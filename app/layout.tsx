@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, Public_Sans } from "next/font/google";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import "./globals.css";
 
 // Placeholder pairing (Cabinet Grotesk + General Sans aren't on Google Fonts
@@ -32,11 +30,7 @@ export default function RootLayout({
       lang="uk"
       className={`${spaceGrotesk.variable} ${publicSans.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
-      </body>
+      <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );
 }

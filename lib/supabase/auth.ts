@@ -21,8 +21,9 @@ export async function createAuthClient() {
               cookieStore.set(name, value, options),
             );
           } catch {
-            // Called from a Server Component render — proxy.ts refreshes the
-            // session cookie on navigation, so this can be safely ignored.
+            // Called from a Server Component render, which can't set cookies.
+            // Sign-in/out both happen via Server Actions (admin-auth.ts),
+            // which can set cookies, so the session still gets persisted there.
           }
         },
       },

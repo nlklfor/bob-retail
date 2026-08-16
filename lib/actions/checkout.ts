@@ -2,13 +2,16 @@
 
 import { z } from "zod";
 import { createAdminClient } from "@/lib/supabase/server";
+import { resolveShippingCost } from "@/lib/nova-poshta/pricing";
 
 const checkoutSchema = z.object({
   customerName: z.string().min(1).max(200),
   customerPhone: z.string().min(5).max(30),
   customerEmail: z.string().email().optional().or(z.literal("")),
   shippingCity: z.string().min(1).max(200),
+  shippingCityRef: z.string().min(1),
   shippingBranch: z.string().min(1).max(200),
+  shippingWarehouseRef: z.string().min(1),
   items: z
     .array(
       z.object({
@@ -24,9 +27,6 @@ export type CheckoutInput = z.infer<typeof checkoutSchema>;
 export type CheckoutResult =
   { success: true; orderId: string } | { success: false; error: string };
 
-// Flat placeholder until real Nova Poshta cost calculation is integrated (Phase 7 territory).
-const SHIPPING_COST_STUB = 80;
-
 export async function placeOrderAction(
   input: CheckoutInput,
 ): Promise<CheckoutResult> {
@@ -40,9 +40,15 @@ export async function placeOrderAction(
     customerPhone,
     customerEmail,
     shippingCity,
+    shippingCityRef,
     shippingBranch,
     items,
   } = parsed.data;
+
+  // Never trust a client-supplied shipping cost — re-quote it server-side
+  // from the real Nova Poshta API, same rule place_order() already applies
+  // to price/stock.
+  const shippingCost = await resolveShippingCost(shippingCityRef, items);
 
   const supabase = createAdminClient();
 
@@ -56,7 +62,7 @@ export async function placeOrderAction(
     p_customer_email: customerEmail || null,
     p_shipping_city: shippingCity,
     p_shipping_branch: shippingBranch,
-    p_shipping_cost: SHIPPING_COST_STUB,
+    p_shipping_cost: shippingCost,
   });
 
   if (error || !orderId) {

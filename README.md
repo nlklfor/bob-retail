@@ -47,7 +47,7 @@ Visual direction is dark, raw, and editorial — near-black palette, a single re
 | Storefront (catalog, product pages, cart, wishlist, checkout)    | ✅ Built                                                  |
 | Admin panel (products, variants, image upload, order management) | ✅ Built                                                  |
 | Atomic, stock-safe checkout (`place_order()`)                    | ✅ Built                                                  |
-| Nova Poshta branch search & real shipping cost                   | 🚧 In progress — personal API key wired up                |
+| Nova Poshta branch search & real shipping cost                   | ✅ Built — live city/branch search + dynamic cost quote   |
 | Monobank payment integration                                     | ⏳ Blocked — waiting on client's business Acquiring token |
 | Fiscal receipts (РРО/ПРРО)                                       | ⏳ Planned — pending client's accountant/provider choice  |
 | Design & motion pass                                             | ⏳ Deferred — functional build first                      |
@@ -65,10 +65,11 @@ bun install
 Create `.env.local` in the project root (see [`.env.example`](.env.example) for the exact variable names — never put real values in `.env.example` itself, it's committed to git):
 
 ```
-SUPABASE_URL=              # Supabase dashboard → Project Settings → API
+SUPABASE_URL=                  # Supabase dashboard → Project Settings → API
 SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
-NOVA_POST_API_KEY=         # personal key from my.novaposhta.ua
+NOVA_POST_API_KEY=             # personal key from my.novaposhta.ua
+NOVA_POST_SENDER_CITY_NAME=    # Cyrillic city name orders ship from, e.g. Київ
 ```
 
 ```bash

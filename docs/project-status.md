@@ -11,7 +11,7 @@ BOB Retail: a streetwear e-commerce site, built for a client (not the developer'
 Your code is safe — everything is pushed to `https://github.com/nlklfor/bob-retail.git`. What's **not** in git (by design — never commit secrets):
 
 1. Clone the repo, `bun install`.
-2. Recreate `.env.local` — see `.env.example` in the repo root for the exact variable names (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `NOVA_POST_API_KEY`). Get the Supabase values from the Supabase dashboard → this project ("bob-retail", ref `aqtxsnacasvlqaagqaoq`) → Project Settings → API — you still own that account, so these are always recoverable there even if lost locally. Get the Nova Poshta key from your account at `my.novaposhta.ua`. **Never put real values in `.env.example`** — that file is committed to git (deliberately, as a template); only `.env.local` is gitignored.
+2. Recreate `.env.local` — see `.env.example` in the repo root for the exact variable names (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `NOVA_POST_API_KEY`, `NOVA_POST_SENDER_CITY_NAME`). Get the Supabase values from the Supabase dashboard → this project ("bob-retail", ref `aqtxsnacasvlqaagqaoq`) → Project Settings → API — you still own that account, so these are always recoverable there even if lost locally. Get the Nova Poshta key from your account at `my.novaposhta.ua`. `NOVA_POST_SENDER_CITY_NAME` is the Ukrainian (Cyrillic) name of the city orders ship from, e.g. `Київ` — Nova Poshta's API only accepts Cyrillic input, Latin transliterations are rejected. **Never put real values in `.env.example`** — that file is committed to git (deliberately, as a template); only `.env.local` is gitignored.
 3. `bun run dev`.
 4. Admin panel: `/admin/login`, staff email `myhub245@gmail.com`. If the password's forgotten, reset it via Supabase Dashboard → Authentication → Users (don't need me for that) — deliberately not writing the actual password anywhere in this repo, since a committed file becomes a permanent secret in git history.
 
@@ -57,12 +57,20 @@ All tables live in `public`, RLS enabled everywhere, migrations are incremental 
 ## What's explicitly stubbed — not real yet, flagged in code comments
 
 - **Payment**: `place_order()` succeeds → the code immediately marks the order "paid" as a stand-in for a real Monobank webhook. No actual payment happens. **Must be replaced before real launch** — right now anyone who reaches `/checkout` can get a confirmed order for free.
-- **Nova Poshta**: checkout city/branch are plain manual text fields, not real API-backed branch search. Shipping cost is a flat 80 UAH placeholder, not real cost calculation.
 - **Fonts**: Space Grotesk + Public Sans (Google Fonts) as a placeholder for the originally-discussed Cabinet Grotesk + General Sans (Fontshare), which need self-hosting that hasn't been set up. Swappable later without touching component code.
+
+## Nova Poshta integration (2026-08-16)
+
+Real, not stubbed: `lib/nova-poshta/client.ts` wraps the live Nova Poshta v2.0 JSON API (`Address.getCities`, `Address.getWarehouses`, `InternetDocument.getDocumentPrice`) — verified directly against the real API with the developer's personal key before shipping. The checkout page (`app/(storefront)/checkout/page.tsx`) has real debounced city/branch autocomplete backed by Server Actions in `lib/actions/nova-poshta.ts`, and shows a live shipping-cost preview.
+
+- **Shipping cost is real and dynamic** (distance/weight-based via Nova Poshta, not a flat number) — but the `Weight` input into that calculation is an estimate: `WEIGHT_PER_ITEM_KG = 0.5` in `lib/nova-poshta/pricing.ts`, since `product_variants` has no real weight column yet. Tune that constant if quoted costs look off; adding real per-variant weights is a later migration + admin form change, not required for this to work.
+- **`resolveShippingCost()`** (`lib/nova-poshta/pricing.ts`) is the single source of truth for shipping cost, called both by the live checkout-page preview and — authoritatively, never trusting whatever the client showed — by `placeOrderAction` itself. Same "server always re-derives, never trusts the client" rule the rest of checkout already followed for price/stock.
+- **Sender city** comes from `NOVA_POST_SENDER_CITY_NAME` (Cyrillic city name, resolved to a Nova Poshta city Ref at runtime and cached in memory). If that env var isn't set, or the Nova Poshta API call fails for any reason, shipping cost falls back to a flat 80 UAH rather than blocking checkout.
+- Nova Poshta's search API only accepts **Cyrillic** input — Latin transliterations (`"Kyiv"`) return a confusing `"FindByString is not specified"` error rather than empty results. Not an issue for real usage (Ukrainian customers type Ukrainian), but worth knowing if testing manually.
+- Real waybill creation (as opposed to search + price quoting) still needs the _client's_ Nova Poshta business account — that's a later phase, unrelated to the developer's personal key used here.
 
 ## What's next / currently blocked
 
-- **Nova Poshta real integration** — unblocked as of 2026-08-16: developer's own personal API key from `my.novaposhta.ua` is now in `.env.local` (`NOVA_POST_API_KEY`). Ready to implement city/branch search + cost calculation. Real waybill creation still needs the _client's_ business account, but that's a later phase.
 - **Monobank real integration** — still blocked as of 2026-08-16 on the **client's** Acquiring API token (their business account, not the developer's — this one can't be substituted with a personal account). The API contract is already researched and ready to implement once the token exists: `POST /api/merchant/invoice/create` → redirect to `pageUrl` → webhook to our endpoint (payload signed ECDSA-SHA256, signature in `x-sign` header, verified against `GET /api/merchant/pubkey`) → `GET /api/merchant/invoice/status` as a fallback check. Real integration also needs a stock-expiry cleanup job, since Monobank does **not** send a webhook for `expired` invoices — currently stock is decremented immediately at order creation, so an abandoned payment needs an explicit sweep to release it.
 - **Design/animation pass** — deliberately deferred, client to revisit the open design questions later (see `docs/design-direction.md`) — not currently blocking other work.
 

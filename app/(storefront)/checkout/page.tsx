@@ -1,9 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCartStore, useCartSubtotal } from "@/lib/cart-store";
 import { placeOrderAction } from "@/lib/actions/checkout";
+import {
+  searchCitiesAction,
+  searchWarehousesAction,
+  previewShippingCostAction,
+} from "@/lib/actions/nova-poshta";
+import type {
+  NovaPoshtaCity,
+  NovaPoshtaWarehouse,
+} from "@/lib/nova-poshta/client";
+
+const DEBOUNCE_MS = 350;
 
 export default function CheckoutPage() {
   const items = useCartStore((state) => state.items);
@@ -14,9 +25,107 @@ export default function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [cityQuery, setCityQuery] = useState("");
+  const [cityResults, setCityResults] = useState<NovaPoshtaCity[]>([]);
+  const [selectedCity, setSelectedCity] = useState<NovaPoshtaCity | null>(null);
+
+  const [warehouseQuery, setWarehouseQuery] = useState("");
+  const [warehouseResults, setWarehouseResults] = useState<
+    NovaPoshtaWarehouse[]
+  >([]);
+  const [selectedWarehouse, setSelectedWarehouse] =
+    useState<NovaPoshtaWarehouse | null>(null);
+
+  const [shippingCost, setShippingCost] = useState<number | null>(null);
+  const [resolvedQuoteKey, setResolvedQuoteKey] = useState<string | null>(null);
+
+  // City search, debounced. Results are only fetched (not reset) here —
+  // whether they're shown is a derived value below, so the effect never
+  // needs to setState synchronously on its early-return paths.
+  const cityQueryIsSettled = selectedCity && cityQuery === selectedCity.name;
+  useEffect(() => {
+    if (cityQueryIsSettled || cityQuery.trim().length < 2) return;
+    const handle = setTimeout(async () => {
+      const result = await searchCitiesAction(cityQuery);
+      setCityResults(result.cities);
+    }, DEBOUNCE_MS);
+    return () => clearTimeout(handle);
+  }, [cityQuery, cityQueryIsSettled]);
+  const visibleCityResults =
+    cityQueryIsSettled || cityQuery.trim().length < 2 ? [] : cityResults;
+
+  // Warehouse search, debounced — only once a city is selected
+  const warehouseQueryIsSettled =
+    selectedWarehouse && warehouseQuery === selectedWarehouse.description;
+  useEffect(() => {
+    if (!selectedCity || warehouseQueryIsSettled) return;
+    const handle = setTimeout(async () => {
+      const result = await searchWarehousesAction(
+        selectedCity.ref,
+        warehouseQuery,
+      );
+      setWarehouseResults(result.warehouses);
+    }, DEBOUNCE_MS);
+    return () => clearTimeout(handle);
+  }, [warehouseQuery, selectedCity, warehouseQueryIsSettled]);
+  const visibleWarehouseResults = warehouseQueryIsSettled
+    ? []
+    : warehouseResults;
+
+  // Live shipping cost preview once a city is picked. "Loading" is derived
+  // by comparing the key of the currently-selected city+cart against the key
+  // the last resolved quote was for, rather than tracked as its own piece of
+  // state — the resolvedQuoteKey update only ever happens inside the async
+  // .then callback, never synchronously in the effect body.
+  const currentQuoteKey = selectedCity
+    ? `${selectedCity.ref}|${items.map((i) => `${i.variantId}:${i.quantity}`).join(",")}`
+    : null;
+  useEffect(() => {
+    if (!selectedCity || !currentQuoteKey) return;
+    let cancelled = false;
+    previewShippingCostAction({
+      cityRef: selectedCity.ref,
+      items: items.map((i) => ({
+        variantId: i.variantId,
+        quantity: i.quantity,
+      })),
+    }).then((result) => {
+      if (cancelled) return;
+      if ("cost" in result) {
+        setShippingCost(result.cost);
+        setResolvedQuoteKey(currentQuoteKey);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedCity, items, currentQuoteKey]);
+  const visibleShippingCost =
+    currentQuoteKey && resolvedQuoteKey === currentQuoteKey
+      ? shippingCost
+      : null;
+  const visibleShippingCostLoading = Boolean(
+    currentQuoteKey && resolvedQuoteKey !== currentQuoteKey,
+  );
+
+  function selectCity(city: NovaPoshtaCity) {
+    setSelectedCity(city);
+    setCityQuery(city.name);
+    setCityResults([]);
+    setSelectedWarehouse(null);
+    setWarehouseQuery("");
+    setWarehouseResults([]);
+  }
+
+  function selectWarehouse(warehouse: NovaPoshtaWarehouse) {
+    setSelectedWarehouse(warehouse);
+    setWarehouseQuery(warehouse.description);
+    setWarehouseResults([]);
+  }
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (submitting) return;
+    if (submitting || !selectedCity || !selectedWarehouse) return;
     setSubmitting(true);
     setError(null);
 
@@ -25,8 +134,10 @@ export default function CheckoutPage() {
       customerName: String(formData.get("customerName") ?? ""),
       customerPhone: String(formData.get("customerPhone") ?? ""),
       customerEmail: String(formData.get("customerEmail") ?? ""),
-      shippingCity: String(formData.get("shippingCity") ?? ""),
-      shippingBranch: String(formData.get("shippingBranch") ?? ""),
+      shippingCity: selectedCity.name,
+      shippingCityRef: selectedCity.ref,
+      shippingBranch: selectedWarehouse.description,
+      shippingWarehouseRef: selectedWarehouse.ref,
       items: items.map((item) => ({
         variantId: item.variantId,
         quantity: item.quantity,
@@ -53,6 +164,9 @@ export default function CheckoutPage() {
       </div>
     );
   }
+
+  const canSubmit = Boolean(selectedCity && selectedWarehouse);
+  const total = subtotal + (visibleShippingCost ?? 0);
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-12 grid gap-10 sm:grid-cols-2">
@@ -88,30 +202,82 @@ export default function CheckoutPage() {
             Nova Poshta delivery
           </h2>
           <div className="space-y-3">
-            <input
-              name="shippingCity"
-              placeholder="City"
-              required
-              className="w-full border border-border bg-transparent px-3 py-2"
-            />
-            <input
-              name="shippingBranch"
-              placeholder="Branch number / address"
-              required
-              className="w-full border border-border bg-transparent px-3 py-2"
-            />
+            <div className="relative">
+              <input
+                value={cityQuery}
+                onChange={(e) => {
+                  setCityQuery(e.target.value);
+                  if (selectedCity && e.target.value !== selectedCity.name) {
+                    setSelectedCity(null);
+                  }
+                }}
+                placeholder="City"
+                required
+                autoComplete="off"
+                className="w-full border border-border bg-transparent px-3 py-2"
+              />
+              {visibleCityResults.length > 0 && (
+                <ul className="absolute z-10 mt-1 w-full max-h-60 overflow-y-auto border border-border bg-bg">
+                  {visibleCityResults.map((city) => (
+                    <li key={city.ref}>
+                      <button
+                        type="button"
+                        onClick={() => selectCity(city)}
+                        className="block w-full px-3 py-2 text-left text-sm hover:bg-surface"
+                      >
+                        {city.name}
+                        {city.area ? (
+                          <span className="text-muted"> · {city.area}</span>
+                        ) : null}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <div className="relative">
+              <input
+                value={warehouseQuery}
+                onChange={(e) => {
+                  setWarehouseQuery(e.target.value);
+                  if (
+                    selectedWarehouse &&
+                    e.target.value !== selectedWarehouse.description
+                  ) {
+                    setSelectedWarehouse(null);
+                  }
+                }}
+                placeholder={selectedCity ? "Branch" : "Select a city first"}
+                required
+                disabled={!selectedCity}
+                autoComplete="off"
+                className="w-full border border-border bg-transparent px-3 py-2 disabled:opacity-40"
+              />
+              {visibleWarehouseResults.length > 0 && (
+                <ul className="absolute z-10 mt-1 w-full max-h-60 overflow-y-auto border border-border bg-bg">
+                  {visibleWarehouseResults.map((warehouse) => (
+                    <li key={warehouse.ref}>
+                      <button
+                        type="button"
+                        onClick={() => selectWarehouse(warehouse)}
+                        className="block w-full px-3 py-2 text-left text-sm hover:bg-surface"
+                      >
+                        {warehouse.description}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
-          <p className="mt-2 text-sm text-muted">
-            Branch lookup via the Nova Poshta API isn&apos;t wired up yet —
-            enter manually for now.
-          </p>
         </div>
 
         {error ? <p className="text-danger text-sm">{error}</p> : null}
 
         <button
           type="submit"
-          disabled={submitting}
+          disabled={submitting || !canSubmit}
           className="w-full border border-fg py-3 text-sm uppercase tracking-wide hover:bg-fg hover:text-bg disabled:opacity-30"
         >
           {submitting ? "Placing order..." : "Place order"}
@@ -136,14 +302,28 @@ export default function CheckoutPage() {
             </div>
           ))}
         </div>
-        <div className="flex justify-between border-t border-border pt-4 mt-2">
-          <span className="uppercase tracking-wide text-sm">Subtotal</span>
-          <span>{subtotal} UAH</span>
+        <div className="mt-2 space-y-1">
+          <div className="flex justify-between">
+            <span className="uppercase tracking-wide text-sm">Subtotal</span>
+            <span>{subtotal} UAH</span>
+          </div>
+          <div className="flex justify-between text-sm text-muted">
+            <span>Shipping</span>
+            <span>
+              {!selectedCity
+                ? "Select a city"
+                : visibleShippingCostLoading
+                  ? "Calculating..."
+                  : visibleShippingCost !== null
+                    ? `${visibleShippingCost} UAH`
+                    : "—"}
+            </span>
+          </div>
+          <div className="flex justify-between border-t border-border pt-2 mt-1 text-accent">
+            <span className="uppercase tracking-wide">Total</span>
+            <span>{total} UAH</span>
+          </div>
         </div>
-        <p className="mt-1 text-sm text-muted">
-          Shipping cost is a flat placeholder for now — real Nova Poshta pricing
-          comes later.
-        </p>
       </div>
     </div>
   );

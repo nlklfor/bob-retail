@@ -25,6 +25,28 @@ Your code is safe — everything is pushed to `https://github.com/nlklfor/bob-re
 - **Routing**: `app/(storefront)/` (Header/Footer layout) vs `app/admin/` (`login/` outside the protected group to avoid a redirect loop, `(protected)/` wraps the actual staff pages). Route groups `()` don't affect URLs; `[param]` folders are real dynamic route segments.
 - **Types**: plain hand-written flat interfaces in `lib/types.ts`, not the full Supabase-generated `Database`/`Row`/`Insert`/`Update` generics — deliberate readability trade-off for a small single-developer project. Documented as a reasonable future upgrade, not a permanent ceiling.
 
+## Database schema
+
+All tables live in `public`, RLS enabled everywhere, migrations are incremental and timestamped in `supabase/migrations/`.
+
+| Table              | Purpose                                                                                                                        | Anon access                                   |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------- |
+| `categories`       | Catalog categories                                                                                                             | Read (public)                                 |
+| `products`         | Product name/slug/description/price/`images[]`/`is_active` — price lives here, not on variants                                 | Read, only where `is_active = true`           |
+| `product_variants` | One row per size (`size`, `stock_quantity`, `is_active`) — the only variant dimension is size, colorways are separate products | Read, only active variants of active products |
+| `orders`           | Guest order header: customer contact info, shipping city/branch, status, subtotal/shipping/total                               | **None** — only reachable via `place_order()` |
+| `order_items`      | Line-item snapshot at time of purchase (name/size/price frozen even if the product changes later)                              | **None**                                      |
+| `payments`         | Payment record per order (`provider`, `status`, `amount`, `external_reference`) — currently always `provider = 'stub'`         | **None**                                      |
+
+`place_order(p_items, p_customer_name, p_customer_phone, p_customer_email, p_shipping_city, p_shipping_branch, p_shipping_cost)` is the only way an order gets created. It's `SECURITY DEFINER`, revoked from `public`, granted only to `service_role` — so even a leaked anon key can't call it directly. Inside one transaction it: locks each `product_variants` row (`FOR UPDATE`), rejects inactive/out-of-stock/nonexistent variants, computes real totals from the database (never from the client), decrements stock, and inserts the order + order_items + a pending payment row.
+
+## Tooling & conventions
+
+- **Package manager**: Bun (`bun install`, `bun run dev`).
+- **Linting/formatting**: ESLint (`eslint.config.mjs`, `eslint-config-next`) + Prettier, wired to run automatically pre-commit via `simple-git-hooks` + `lint-staged` (see `package.json`) — staged `.ts`/`.tsx` files get `eslint --fix` + `prettier --write`, staged `.json`/`.css`/`.md` get `prettier --write`.
+- **Testing**: none yet. No test runner is configured — worth setting up before the Monobank integration lands, since that's the highest-stakes code path (real money).
+- **Types**: hand-written flat interfaces in `lib/types.ts` rather than Supabase's generated `Database`/`Row`/`Insert`/`Update` generics — see the note under Architecture snapshot.
+
 ## What's built and working
 
 - Storefront: homepage, `/catalog` (category filter via `?category=`), `/products/[slug]` (stock-aware size selection), `/cart`, `/wishlist`, `/checkout` → `/order/[id]` confirmation.

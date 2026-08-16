@@ -14,18 +14,18 @@ export default async function AdminLayout({
       <div className="flex items-center justify-between border-b border-border pb-4">
         <nav className="flex gap-6 text-sm uppercase tracking-wide">
           <Link href="/admin" className="hover:text-accent">
-            Dashboard
+            Панель керування
           </Link>
           <Link href="/admin/products" className="hover:text-accent">
-            Products
+            Товари
           </Link>
           <Link href="/admin/orders" className="hover:text-accent">
-            Orders
+            Замовлення
           </Link>
         </nav>
         <form action={signOutAction}>
           <button type="submit" className="text-sm text-muted hover:text-fg">
-            Sign out
+            Вийти
           </button>
         </form>
       </div>

@@ -158,9 +158,9 @@ export default function CheckoutPage() {
     return (
       <div className="mx-auto max-w-6xl px-6 py-12">
         <h1 className="font-display text-3xl uppercase tracking-tight">
-          Checkout
+          Оформлення замовлення
         </h1>
-        <p className="mt-8 text-muted">Your bag is empty.</p>
+        <p className="mt-8 text-muted">Ваш кошик порожній.</p>
       </div>
     );
   }
@@ -173,25 +173,25 @@ export default function CheckoutPage() {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <h2 className="text-sm uppercase tracking-wide text-muted mb-3">
-            Contact
+            Контактні дані
           </h2>
           <div className="space-y-3">
             <input
               name="customerName"
-              placeholder="Full name"
+              placeholder="Повне ім'я"
               required
               className="w-full border border-border bg-transparent px-3 py-2"
             />
             <input
               name="customerPhone"
-              placeholder="Phone"
+              placeholder="Телефон"
               required
               className="w-full border border-border bg-transparent px-3 py-2"
             />
             <input
               name="customerEmail"
               type="email"
-              placeholder="Email (optional)"
+              placeholder="Email (необов'язково)"
               className="w-full border border-border bg-transparent px-3 py-2"
             />
           </div>
@@ -199,7 +199,7 @@ export default function CheckoutPage() {
 
         <div>
           <h2 className="text-sm uppercase tracking-wide text-muted mb-3">
-            Nova Poshta delivery
+            Доставка Новою Поштою
           </h2>
           <div className="space-y-3">
             <div className="relative">
@@ -211,7 +211,7 @@ export default function CheckoutPage() {
                     setSelectedCity(null);
                   }
                 }}
-                placeholder="City"
+                placeholder="Місто"
                 required
                 autoComplete="off"
                 className="w-full border border-border bg-transparent px-3 py-2"
@@ -248,7 +248,9 @@ export default function CheckoutPage() {
                     setSelectedWarehouse(null);
                   }
                 }}
-                placeholder={selectedCity ? "Branch" : "Select a city first"}
+                placeholder={
+                  selectedCity ? "Відділення" : "Спочатку оберіть місто"
+                }
                 required
                 disabled={!selectedCity}
                 autoComplete="off"
@@ -280,13 +282,13 @@ export default function CheckoutPage() {
           disabled={submitting || !canSubmit}
           className="w-full border border-fg py-3 text-sm uppercase tracking-wide hover:bg-fg hover:text-bg disabled:opacity-30"
         >
-          {submitting ? "Placing order..." : "Place order"}
+          {submitting ? "Оформлення..." : "Оформити замовлення"}
         </button>
       </form>
 
       <div>
         <h2 className="text-sm uppercase tracking-wide text-muted mb-3">
-          Order summary
+          Підсумок замовлення
         </h2>
         <div className="divide-y divide-border">
           {items.map((item) => (
@@ -298,30 +300,30 @@ export default function CheckoutPage() {
                 {item.name} {item.size ? `(${item.size})` : ""} ×{" "}
                 {item.quantity}
               </span>
-              <span>{item.price * item.quantity} UAH</span>
+              <span>{item.price * item.quantity} грн</span>
             </div>
           ))}
         </div>
         <div className="mt-2 space-y-1">
           <div className="flex justify-between">
-            <span className="uppercase tracking-wide text-sm">Subtotal</span>
-            <span>{subtotal} UAH</span>
+            <span className="uppercase tracking-wide text-sm">Сума</span>
+            <span>{subtotal} грн</span>
           </div>
           <div className="flex justify-between text-sm text-muted">
-            <span>Shipping</span>
+            <span>Доставка</span>
             <span>
               {!selectedCity
-                ? "Select a city"
+                ? "Оберіть місто"
                 : visibleShippingCostLoading
-                  ? "Calculating..."
+                  ? "Розрахунок..."
                   : visibleShippingCost !== null
-                    ? `${visibleShippingCost} UAH`
+                    ? `${visibleShippingCost} грн`
                     : "—"}
             </span>
           </div>
           <div className="flex justify-between border-t border-border pt-2 mt-1 text-accent">
-            <span className="uppercase tracking-wide">Total</span>
-            <span>{total} UAH</span>
+            <span className="uppercase tracking-wide">Разом</span>
+            <span>{total} грн</span>
           </div>
         </div>
       </div>

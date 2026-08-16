@@ -10,14 +10,16 @@ export function WishlistButton({ item }: { item: WishlistItem }) {
     <button
       type="button"
       onClick={() => toggle(item)}
-      aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
+      aria-label={
+        inWishlist ? "Прибрати зі списку бажань" : "Додати до списку бажань"
+      }
       className={`border px-3 py-3 text-sm uppercase tracking-wide ${
         inWishlist
           ? "border-accent text-accent"
           : "border-fg hover:bg-fg hover:text-bg"
       }`}
     >
-      {inWishlist ? "Saved" : "Save"}
+      {inWishlist ? "Збережено" : "Зберегти"}
     </button>
   );
 }

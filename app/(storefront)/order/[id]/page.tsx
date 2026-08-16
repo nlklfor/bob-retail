@@ -30,9 +30,11 @@ export default async function OrderConfirmationPage({
   return (
     <div className="mx-auto max-w-2xl px-6 py-12">
       <h1 className="font-display text-3xl uppercase tracking-tight">
-        {order.status === "paid" ? "Order confirmed" : "Order received"}
+        {order.status === "paid"
+          ? "Замовлення оплачено"
+          : "Замовлення отримано"}
       </h1>
-      <p className="mt-2 text-muted">Order #{order.id.slice(0, 8)}</p>
+      <p className="mt-2 text-muted">Замовлення №{order.id.slice(0, 8)}</p>
 
       <div className="mt-8 divide-y divide-border">
         {order.order_items.map((item) => (
@@ -41,23 +43,23 @@ export default async function OrderConfirmationPage({
               {item.product_name} {item.size ? `(${item.size})` : ""} ×{" "}
               {item.quantity}
             </span>
-            <span>{item.line_total} UAH</span>
+            <span>{item.line_total} грн</span>
           </div>
         ))}
       </div>
 
       <div className="mt-6 space-y-1 text-sm">
         <div className="flex justify-between">
-          <span className="text-muted">Subtotal</span>
-          <span>{order.subtotal} UAH</span>
+          <span className="text-muted">Сума</span>
+          <span>{order.subtotal} грн</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-muted">Shipping</span>
-          <span>{order.shipping_cost} UAH</span>
+          <span className="text-muted">Доставка</span>
+          <span>{order.shipping_cost} грн</span>
         </div>
         <div className="flex justify-between border-t border-border pt-2 mt-2 text-accent">
-          <span className="uppercase tracking-wide">Total</span>
-          <span>{order.total} UAH</span>
+          <span className="uppercase tracking-wide">Разом</span>
+          <span>{order.total} грн</span>
         </div>
       </div>
 
@@ -66,7 +68,7 @@ export default async function OrderConfirmationPage({
           {order.customer_name} · {order.customer_phone}
         </p>
         <p>
-          Nova Poshta — {order.shipping_city}, {order.shipping_branch}
+          Нова Пошта — {order.shipping_city}, {order.shipping_branch}
         </p>
       </div>
     </div>

@@ -11,7 +11,7 @@ export default async function Home() {
       </h1>
 
       {products.length === 0 ? (
-        <p className="mt-8 text-muted">No products yet.</p>
+        <p className="mt-8 text-muted">Поки немає товарів.</p>
       ) : (
         <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
           {products.map((product) => (

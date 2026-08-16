@@ -17,13 +17,13 @@ export default async function AdminProductsPage() {
     <div>
       <div className="flex items-center justify-between">
         <h1 className="font-display text-2xl uppercase tracking-tight">
-          Products
+          Товари
         </h1>
         <Link
           href="/admin/products/new"
           className="border border-fg px-4 py-2 text-sm uppercase tracking-wide hover:bg-fg hover:text-bg"
         >
-          New product
+          Новий товар
         </Link>
       </div>
 
@@ -42,14 +42,14 @@ export default async function AdminProductsPage() {
                 <p className="uppercase tracking-wide text-sm">
                   {product.name}{" "}
                   {!product.is_active && (
-                    <span className="text-muted">(draft)</span>
+                    <span className="text-muted">(чернетка)</span>
                   )}
                 </p>
                 <p className="text-sm text-muted">
                   {product.category_id
                     ? categoryNameById.get(product.category_id)
                     : "—"}{" "}
-                  · {product.price} UAH · {totalStock} in stock
+                  · {product.price} грн · {totalStock} на складі
                 </p>
               </div>
               <div className="flex gap-4 text-sm">
@@ -57,14 +57,14 @@ export default async function AdminProductsPage() {
                   href={`/admin/products/${product.id}/edit`}
                   className="hover:text-accent"
                 >
-                  Edit
+                  Редагувати
                 </Link>
                 <form action={deleteProductAction.bind(null, product.id)}>
                   <button
                     type="submit"
                     className="text-muted hover:text-danger"
                   >
-                    Delete
+                    Видалити
                   </button>
                 </form>
               </div>
@@ -72,7 +72,7 @@ export default async function AdminProductsPage() {
           );
         })}
         {products.length === 0 && (
-          <p className="py-4 text-muted">No products yet.</p>
+          <p className="py-4 text-muted">Поки немає товарів.</p>
         )}
       </div>
     </div>

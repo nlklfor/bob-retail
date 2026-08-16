@@ -25,7 +25,7 @@ export default async function EditProductPage({
   return (
     <div>
       <h1 className="font-display text-2xl uppercase tracking-tight">
-        Edit product
+        Редагувати товар
       </h1>
       <div className="mt-6">
         <ProductForm

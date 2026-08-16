@@ -22,14 +22,16 @@ export default async function CatalogPage({
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-12">
-      <h1 className="font-display text-3xl uppercase tracking-tight">Shop</h1>
+      <h1 className="font-display text-3xl uppercase tracking-tight">
+        Каталог
+      </h1>
 
       <div className="mt-4 flex gap-4 text-sm uppercase tracking-wide">
         <Link
           href="/catalog"
           className={!category ? "text-accent" : "text-muted hover:text-fg"}
         >
-          All
+          Усі
         </Link>
         {categories.map((c) => (
           <Link
@@ -45,7 +47,7 @@ export default async function CatalogPage({
       </div>
 
       {filtered.length === 0 ? (
-        <p className="mt-8 text-muted">No products in this category.</p>
+        <p className="mt-8 text-muted">У цій категорії поки немає товарів.</p>
       ) : (
         <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
           {filtered.map((product) => (

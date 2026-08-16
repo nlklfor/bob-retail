@@ -15,7 +15,7 @@ export async function searchCitiesAction(
   try {
     return { cities: await searchCities(query) };
   } catch {
-    return { cities: [], error: "Could not search cities." };
+    return { cities: [], error: "Не вдалося виконати пошук міст." };
   }
 }
 
@@ -26,7 +26,7 @@ export async function searchWarehousesAction(
   try {
     return { warehouses: await getWarehouses(cityRef, query) };
   } catch {
-    return { warehouses: [], error: "Could not load branches." };
+    return { warehouses: [], error: "Не вдалося завантажити відділення." };
   }
 }
 
@@ -47,7 +47,7 @@ export async function previewShippingCostAction(
 ): Promise<{ cost: number } | { error: string }> {
   const parsed = previewSchema.safeParse(input);
   if (!parsed.success) {
-    return { error: "Invalid request." };
+    return { error: "Некоректний запит." };
   }
 
   const cost = await resolveShippingCost(

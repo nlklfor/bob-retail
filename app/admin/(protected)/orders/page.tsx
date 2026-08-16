@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireStaffSession } from "@/lib/admin/dal";
 import { getAllOrdersForAdmin } from "@/lib/admin/orders";
+import { ORDER_STATUS_LABELS } from "@/lib/order-status-labels";
 
 export default async function AdminOrdersPage() {
   await requireStaffSession();
@@ -8,7 +9,9 @@ export default async function AdminOrdersPage() {
 
   return (
     <div>
-      <h1 className="font-display text-2xl uppercase tracking-tight">Orders</h1>
+      <h1 className="font-display text-2xl uppercase tracking-tight">
+        Замовлення
+      </h1>
 
       <div className="mt-6 divide-y divide-border">
         {orders.map((order) => (
@@ -23,14 +26,16 @@ export default async function AdminOrdersPage() {
               </p>
               <p className="text-sm text-muted">
                 {new Date(order.created_at).toLocaleString()} · {order.total}{" "}
-                UAH
+                грн
               </p>
             </div>
-            <span className="text-sm text-accent">{order.status}</span>
+            <span className="text-sm text-accent">
+              {ORDER_STATUS_LABELS[order.status]}
+            </span>
           </Link>
         ))}
         {orders.length === 0 && (
-          <p className="py-4 text-muted">No orders yet.</p>
+          <p className="py-4 text-muted">Поки немає замовлень.</p>
         )}
       </div>
     </div>

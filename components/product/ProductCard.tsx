@@ -21,7 +21,7 @@ export function ProductCard({ product }: { product: Product }) {
         <h3 className="font-display text-sm uppercase tracking-wide">
           {product.name}
         </h3>
-        <span className="text-accent text-sm">{product.price} UAH</span>
+        <span className="text-accent text-sm">{product.price} грн</span>
       </div>
     </Link>
   );

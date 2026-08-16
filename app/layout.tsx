@@ -17,7 +17,7 @@ const publicSans = Public_Sans({
 
 export const metadata: Metadata = {
   title: "BOB Retail",
-  description: "BOB Retail — streetwear.",
+  description: "BOB Retail — стрітвір-бренд.",
 };
 
 export default function RootLayout({

@@ -14,13 +14,13 @@ export function Header() {
 
         <nav className="flex items-center gap-6 text-sm uppercase tracking-wide">
           <Link href="/catalog" className="hover:text-accent">
-            Shop
+            Каталог
           </Link>
           <Link href="/wishlist" className="hover:text-accent">
-            Wishlist
+            Список бажань
           </Link>
           <Link href="/cart" className="hover:text-accent">
-            Bag <CartBadge />
+            Кошик <CartBadge />
           </Link>
         </nav>
       </div>

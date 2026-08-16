@@ -20,7 +20,7 @@ export default async function AdminOrderDetailPage({
     <div className="max-w-2xl">
       <div className="flex items-center justify-between">
         <h1 className="font-display text-2xl uppercase tracking-tight">
-          Order #{order.id.slice(0, 8)}
+          Замовлення №{order.id.slice(0, 8)}
         </h1>
         <OrderStatusSelect orderId={order.id} status={order.status} />
       </div>
@@ -32,7 +32,7 @@ export default async function AdminOrderDetailPage({
           {order.customer_email ? `· ${order.customer_email}` : ""}
         </p>
         <p className="text-muted">
-          Nova Poshta — {order.shipping_city}, {order.shipping_branch}
+          Нова Пошта — {order.shipping_city}, {order.shipping_branch}
         </p>
       </div>
 
@@ -43,23 +43,23 @@ export default async function AdminOrderDetailPage({
               {item.product_name} {item.size ? `(${item.size})` : ""} ×{" "}
               {item.quantity}
             </span>
-            <span>{item.line_total} UAH</span>
+            <span>{item.line_total} грн</span>
           </div>
         ))}
       </div>
 
       <div className="mt-4 space-y-1 text-sm">
         <div className="flex justify-between">
-          <span className="text-muted">Subtotal</span>
-          <span>{order.subtotal} UAH</span>
+          <span className="text-muted">Сума</span>
+          <span>{order.subtotal} грн</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-muted">Shipping</span>
-          <span>{order.shipping_cost} UAH</span>
+          <span className="text-muted">Доставка</span>
+          <span>{order.shipping_cost} грн</span>
         </div>
         <div className="flex justify-between border-t border-border pt-2 mt-2 text-accent">
-          <span className="uppercase tracking-wide">Total</span>
-          <span>{order.total} UAH</span>
+          <span className="uppercase tracking-wide">Разом</span>
+          <span>{order.total} грн</span>
         </div>
       </div>
     </div>

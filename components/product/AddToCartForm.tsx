@@ -33,7 +33,7 @@ export function AddToCartForm({ product }: { product: ProductWithVariants }) {
   }
 
   if (variants.length === 0) {
-    return <p className="text-muted">Out of stock</p>;
+    return <p className="text-muted">Немає в наявності</p>;
   }
 
   return (
@@ -41,7 +41,7 @@ export function AddToCartForm({ product }: { product: ProductWithVariants }) {
       {hasSizes && (
         <div>
           <p className="text-sm uppercase tracking-wide text-muted mb-2">
-            Size
+            Розмір
           </p>
           <div className="flex flex-wrap gap-2">
             {variants.map((variant) => {
@@ -72,7 +72,7 @@ export function AddToCartForm({ product }: { product: ProductWithVariants }) {
         disabled={!selectedVariant || selectedVariant.stock_quantity < 1}
         className="w-full border border-fg py-3 text-sm uppercase tracking-wide hover:bg-fg hover:text-bg disabled:opacity-30 disabled:cursor-not-allowed"
       >
-        {added ? "Added" : "Add to bag"}
+        {added ? "Додано" : "Додати в кошик"}
       </button>
     </div>
   );

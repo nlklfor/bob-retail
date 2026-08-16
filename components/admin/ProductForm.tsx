@@ -5,7 +5,7 @@ import Image from "next/image";
 import type { Category, ProductWithVariants } from "@/lib/types";
 import { uploadProductImageAction } from "@/lib/actions/admin-products";
 
-type VariantRow = { size: string; stockQuantity: number };
+type VariantRow = { size: string; stockQuantity: number; weightGrams: number };
 
 type Props = {
   categories: Category[];
@@ -36,7 +36,8 @@ export function ProductForm({ categories, product, action }: Props) {
     product?.product_variants.map((v) => ({
       size: v.size ?? "",
       stockQuantity: v.stock_quantity,
-    })) ?? [{ size: "", stockQuantity: 0 }],
+      weightGrams: v.weight_grams,
+    })) ?? [{ size: "", stockQuantity: 0, weightGrams: 500 }],
   );
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -86,7 +87,10 @@ export function ProductForm({ categories, product, action }: Props) {
         i === index
           ? {
               ...v,
-              [field]: field === "stockQuantity" ? Number(value) || 0 : value,
+              [field]:
+                field === "stockQuantity" || field === "weightGrams"
+                  ? Number(value) || 0
+                  : value,
             }
           : v,
       ),
@@ -94,7 +98,10 @@ export function ProductForm({ categories, product, action }: Props) {
   }
 
   function addVariant() {
-    setVariants((prev) => [...prev, { size: "", stockQuantity: 0 }]);
+    setVariants((prev) => [
+      ...prev,
+      { size: "", stockQuantity: 0, weightGrams: 500 },
+    ]);
   }
 
   function removeVariant(index: number) {
@@ -116,6 +123,7 @@ export function ProductForm({ categories, product, action }: Props) {
           .map((v) => ({
             size: v.size.trim() || null,
             stockQuantity: v.stockQuantity,
+            weightGrams: v.weightGrams,
           })),
       ),
     );
@@ -131,7 +139,7 @@ export function ProductForm({ categories, product, action }: Props) {
     <form onSubmit={handleSubmit} className="max-w-2xl space-y-6">
       <div>
         <label className="text-sm uppercase tracking-wide text-muted">
-          Name
+          Назва
         </label>
         <input
           name="name"
@@ -144,7 +152,7 @@ export function ProductForm({ categories, product, action }: Props) {
 
       <div>
         <label className="text-sm uppercase tracking-wide text-muted">
-          Slug
+          Слаг (URL)
         </label>
         <input
           name="slug"
@@ -158,7 +166,7 @@ export function ProductForm({ categories, product, action }: Props) {
 
       <div>
         <label className="text-sm uppercase tracking-wide text-muted">
-          Category
+          Категорія
         </label>
         <select
           name="categoryId"
@@ -176,7 +184,7 @@ export function ProductForm({ categories, product, action }: Props) {
 
       <div>
         <label className="text-sm uppercase tracking-wide text-muted">
-          Description
+          Опис
         </label>
         <textarea
           name="description"
@@ -188,7 +196,7 @@ export function ProductForm({ categories, product, action }: Props) {
 
       <div>
         <label className="text-sm uppercase tracking-wide text-muted">
-          Price (UAH)
+          Ціна (грн)
         </label>
         <input
           name="price"
@@ -203,7 +211,7 @@ export function ProductForm({ categories, product, action }: Props) {
 
       <div>
         <label className="text-sm uppercase tracking-wide text-muted">
-          Images
+          Зображення
         </label>
         <div className="mt-2 flex flex-wrap gap-3">
           {images.map((url, i) => (
@@ -228,7 +236,7 @@ export function ProductForm({ categories, product, action }: Props) {
           className="mt-3 text-sm"
         />
         {uploading ? (
-          <p className="mt-1 text-sm text-muted">Uploading...</p>
+          <p className="mt-1 text-sm text-muted">Завантаження...</p>
         ) : null}
         {uploadError ? (
           <p className="mt-1 text-danger text-sm">{uploadError}</p>
@@ -242,19 +250,19 @@ export function ProductForm({ categories, product, action }: Props) {
             name="isActive"
             defaultChecked={product?.is_active ?? false}
           />
-          Active (visible on storefront)
+          Активний (видимий у магазині)
         </label>
       </div>
 
       <div>
         <label className="text-sm uppercase tracking-wide text-muted">
-          Sizes & stock
+          Розміри, залишки та вага
         </label>
         <div className="mt-2 space-y-2">
           {variants.map((v, i) => (
             <div key={i} className="flex gap-2">
               <input
-                placeholder="Size (leave blank if none)"
+                placeholder="Розмір (залиште порожнім, якщо немає)"
                 value={v.size}
                 onChange={(e) => updateVariant(i, "size", e.target.value)}
                 className="flex-1 border border-border bg-transparent px-3 py-2"
@@ -262,12 +270,22 @@ export function ProductForm({ categories, product, action }: Props) {
               <input
                 type="number"
                 min="0"
-                placeholder="Stock"
+                placeholder="Залишок"
                 value={v.stockQuantity}
                 onChange={(e) =>
                   updateVariant(i, "stockQuantity", e.target.value)
                 }
                 className="w-28 border border-border bg-transparent px-3 py-2"
+              />
+              <input
+                type="number"
+                min="1"
+                placeholder="Вага (г)"
+                value={v.weightGrams}
+                onChange={(e) =>
+                  updateVariant(i, "weightGrams", e.target.value)
+                }
+                className="w-32 border border-border bg-transparent px-3 py-2"
               />
               <button
                 type="button"
@@ -275,7 +293,7 @@ export function ProductForm({ categories, product, action }: Props) {
                 disabled={variants.length === 1}
                 className="text-sm text-muted hover:text-danger disabled:opacity-30"
               >
-                Remove
+                Видалити
               </button>
             </div>
           ))}
@@ -285,7 +303,7 @@ export function ProductForm({ categories, product, action }: Props) {
           onClick={addVariant}
           className="mt-2 text-sm text-accent hover:underline"
         >
-          + Add size
+          + Додати розмір
         </button>
       </div>
 
@@ -296,7 +314,7 @@ export function ProductForm({ categories, product, action }: Props) {
         disabled={submitting || uploading}
         className="border border-fg px-4 py-2 text-sm uppercase tracking-wide hover:bg-fg hover:text-bg disabled:opacity-30"
       >
-        {submitting ? "Saving..." : "Save"}
+        {submitting ? "Збереження..." : "Зберегти"}
       </button>
     </form>
   );

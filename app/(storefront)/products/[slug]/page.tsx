@@ -33,7 +33,7 @@ export default async function ProductPage({
         <h1 className="font-display text-3xl uppercase tracking-tight">
           {product.name}
         </h1>
-        <p className="text-accent text-lg mt-1">{product.price} UAH</p>
+        <p className="text-accent text-lg mt-1">{product.price} грн</p>
 
         {product.description ? (
           <p className="text-muted mt-6 leading-relaxed">

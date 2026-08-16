@@ -13,10 +13,12 @@ export default function CartPage() {
   if (items.length === 0) {
     return (
       <div className="mx-auto max-w-6xl px-6 py-12">
-        <h1 className="font-display text-3xl uppercase tracking-tight">Bag</h1>
-        <p className="mt-8 text-muted">Your bag is empty.</p>
+        <h1 className="font-display text-3xl uppercase tracking-tight">
+          Кошик
+        </h1>
+        <p className="mt-8 text-muted">Ваш кошик порожній.</p>
         <Link href="/catalog" className="mt-4 inline-block text-accent">
-          Continue shopping
+          Продовжити покупки
         </Link>
       </div>
     );
@@ -24,7 +26,7 @@ export default function CartPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-12">
-      <h1 className="font-display text-3xl uppercase tracking-tight">Bag</h1>
+      <h1 className="font-display text-3xl uppercase tracking-tight">Кошик</h1>
 
       <div className="mt-8 divide-y divide-border">
         {items.map((item) => (
@@ -45,10 +47,10 @@ export default function CartPage() {
                 <div>
                   <p className="uppercase tracking-wide text-sm">{item.name}</p>
                   {item.size ? (
-                    <p className="text-muted text-sm">Size {item.size}</p>
+                    <p className="text-muted text-sm">Розмір {item.size}</p>
                   ) : null}
                 </div>
-                <p className="text-sm">{item.price * item.quantity} UAH</p>
+                <p className="text-sm">{item.price * item.quantity} грн</p>
               </div>
 
               <div className="flex items-center gap-3">
@@ -56,7 +58,7 @@ export default function CartPage() {
                   className="text-sm text-muted"
                   htmlFor={`qty-${item.variantId}`}
                 >
-                  Qty
+                  Кількість
                 </label>
                 <input
                   id={`qty-${item.variantId}`}
@@ -73,7 +75,7 @@ export default function CartPage() {
                   onClick={() => removeItem(item.variantId)}
                   className="text-sm text-muted hover:text-fg"
                 >
-                  Remove
+                  Видалити
                 </button>
               </div>
             </div>
@@ -82,18 +84,18 @@ export default function CartPage() {
       </div>
 
       <div className="mt-8 flex justify-between border-t border-border pt-6">
-        <span className="uppercase tracking-wide text-sm">Subtotal</span>
-        <span className="text-accent">{subtotal} UAH</span>
+        <span className="uppercase tracking-wide text-sm">Сума</span>
+        <span className="text-accent">{subtotal} грн</span>
       </div>
       <p className="mt-1 text-sm text-muted">
-        Shipping calculated at checkout.
+        Вартість доставки розраховується під час оформлення замовлення.
       </p>
 
       <Link
         href="/checkout"
         className="mt-6 block w-full border border-fg py-3 text-center text-sm uppercase tracking-wide hover:bg-fg hover:text-bg"
       >
-        Checkout
+        Оформити замовлення
       </Link>
     </div>
   );

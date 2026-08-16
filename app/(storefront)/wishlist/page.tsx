@@ -11,11 +11,11 @@ export default function WishlistPage() {
   return (
     <div className="mx-auto max-w-6xl px-6 py-12">
       <h1 className="font-display text-3xl uppercase tracking-tight">
-        Wishlist
+        Список бажань
       </h1>
 
       {items.length === 0 ? (
-        <p className="mt-8 text-muted">Nothing saved yet.</p>
+        <p className="mt-8 text-muted">Поки нічого не збережено.</p>
       ) : (
         <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
           {items.map((item) => (
@@ -35,7 +35,7 @@ export default function WishlistPage() {
                   <h3 className="font-display text-sm uppercase tracking-wide">
                     {item.name}
                   </h3>
-                  <span className="text-accent text-sm">{item.price} UAH</span>
+                  <span className="text-accent text-sm">{item.price} грн</span>
                 </div>
               </Link>
               <button
@@ -43,7 +43,7 @@ export default function WishlistPage() {
                 onClick={() => toggle(item)}
                 className="mt-2 text-sm text-muted hover:text-fg"
               >
-                Remove
+                Видалити
               </button>
             </div>
           ))}

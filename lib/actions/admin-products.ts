@@ -12,23 +12,24 @@ import { uploadProductImage } from "@/lib/admin/storage";
 
 const variantSchema = z.object({
   size: z.string().trim().min(1).nullable(),
-  stockQuantity: z.number().int().min(0),
+  stockQuantity: z.number().int().min(0, "Залишок не може бути від'ємним"),
+  weightGrams: z.number().int().min(1, "Вкажіть вагу більшу за 0"),
 });
 
 const productSchema = z.object({
-  name: z.string().trim().min(1).max(200),
+  name: z.string().trim().min(1, "Вкажіть назву товару").max(200),
   slug: z
     .string()
     .trim()
-    .min(1)
+    .min(1, "Вкажіть слаг")
     .max(200)
     .regex(
       /^[a-z0-9-]+$/,
-      "Slug can only contain lowercase letters, numbers, and hyphens",
+      "Слаг може містити лише латинські малі літери, цифри та дефіси",
     ),
   categoryId: z.string().uuid().nullable(),
   description: z.string().trim().nullable(),
-  price: z.number().min(0),
+  price: z.number().min(0, "Ціна не може бути від'ємною"),
   images: z.array(z.string().trim().min(1)),
   isActive: z.boolean(),
   variants: z.array(variantSchema),
@@ -38,6 +39,7 @@ function parseFormData(formData: FormData) {
   const variants = JSON.parse(String(formData.get("variantsJson") ?? "[]")) as {
     size: string | null;
     stockQuantity: number;
+    weightGrams: number;
   }[];
 
   const images = JSON.parse(
@@ -64,7 +66,7 @@ export async function createProductAction(
   const parsed = parseFormData(formData);
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? "Invalid product data.",
+      error: parsed.error.issues[0]?.message ?? "Некоректні дані товару.",
     };
   }
 
@@ -81,7 +83,7 @@ export async function updateProductAction(
   const parsed = parseFormData(formData);
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? "Invalid product data.",
+      error: parsed.error.issues[0]?.message ?? "Некоректні дані товару.",
     };
   }
 
@@ -96,20 +98,20 @@ export async function uploadProductImageAction(
 
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) {
-    return { error: "No file provided." };
+    return { error: "Файл не надано." };
   }
   if (!file.type.startsWith("image/")) {
-    return { error: "Only image files are allowed." };
+    return { error: "Дозволені лише файли зображень." };
   }
   if (file.size > 5 * 1024 * 1024) {
-    return { error: "Image must be smaller than 5MB." };
+    return { error: "Розмір зображення не повинен перевищувати 5МБ." };
   }
 
   try {
     const url = await uploadProductImage(file);
     return { url };
   } catch {
-    return { error: "Upload failed." };
+    return { error: "Не вдалося завантажити файл." };
   }
 }
 

@@ -6,9 +6,9 @@ export default async function AdminDashboardPage() {
   return (
     <div>
       <h1 className="font-display text-2xl uppercase tracking-tight">
-        Dashboard
+        Панель керування
       </h1>
-      <p className="mt-2 text-muted">Signed in as {user.email}</p>
+      <p className="mt-2 text-muted">Ви увійшли як {user.email}</p>
     </div>
   );
 }

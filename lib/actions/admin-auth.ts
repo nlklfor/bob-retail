@@ -10,14 +10,14 @@ export async function signInAction(
   const password = String(formData.get("password") ?? "");
 
   if (!email || !password) {
-    return { error: "Email and password are required." };
+    return { error: "Введіть email і пароль." };
   }
 
   const supabase = await createAuthClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
-    return { error: "Invalid email or password." };
+    return { error: "Невірний email або пароль." };
   }
 
   redirect("/admin");

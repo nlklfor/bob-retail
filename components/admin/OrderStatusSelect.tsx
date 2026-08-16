@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { updateOrderStatusAction } from "@/lib/actions/admin-orders";
+import { ORDER_STATUS_LABELS } from "@/lib/order-status-labels";
 import type { OrderStatus } from "@/lib/types";
 
 const STATUSES: OrderStatus[] = [
@@ -41,7 +42,7 @@ export function OrderStatusSelect({
     >
       {STATUSES.map((s) => (
         <option key={s} value={s}>
-          {s}
+          {ORDER_STATUS_LABELS[s]}
         </option>
       ))}
     </select>

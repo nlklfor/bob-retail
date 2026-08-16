@@ -20,6 +20,7 @@ export type ProductVariant = {
   product_id: string;
   size: string | null;
   stock_quantity: number;
+  weight_grams: number;
   is_active: boolean;
 };
 

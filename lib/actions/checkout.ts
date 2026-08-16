@@ -1,28 +1,10 @@
 "use server";
 
-import { z } from "zod";
 import { createAdminClient } from "@/lib/supabase/server";
 import { resolveShippingCost } from "@/lib/nova-poshta/pricing";
+import { checkoutSchema, type CheckoutInput } from "./checkout-schema";
 
-const checkoutSchema = z.object({
-  customerName: z.string().min(1).max(200),
-  customerPhone: z.string().min(5).max(30),
-  customerEmail: z.string().email().optional().or(z.literal("")),
-  shippingCity: z.string().min(1).max(200),
-  shippingCityRef: z.string().min(1),
-  shippingBranch: z.string().min(1).max(200),
-  shippingWarehouseRef: z.string().min(1),
-  items: z
-    .array(
-      z.object({
-        variantId: z.string().uuid(),
-        quantity: z.number().int().min(1).max(20),
-      }),
-    )
-    .min(1),
-});
-
-export type CheckoutInput = z.infer<typeof checkoutSchema>;
+export type { CheckoutInput };
 
 export type CheckoutResult =
   { success: true; orderId: string } | { success: false; error: string };
@@ -32,7 +14,7 @@ export async function placeOrderAction(
 ): Promise<CheckoutResult> {
   const parsed = checkoutSchema.safeParse(input);
   if (!parsed.success) {
-    return { success: false, error: "Invalid checkout details." };
+    return { success: false, error: "Некоректні дані замовлення." };
   }
 
   const {
@@ -68,7 +50,7 @@ export async function placeOrderAction(
   if (error || !orderId) {
     return {
       success: false,
-      error: error?.message ?? "Could not place order.",
+      error: error?.message ?? "Не вдалося оформити замовлення.",
     };
   }
 

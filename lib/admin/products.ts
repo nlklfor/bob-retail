@@ -35,7 +35,11 @@ export type ProductInput = {
   price: number;
   images: string[];
   isActive: boolean;
-  variants: { size: string | null; stockQuantity: number }[];
+  variants: {
+    size: string | null;
+    stockQuantity: number;
+    weightGrams: number;
+  }[];
 };
 
 export async function createProduct(input: ProductInput): Promise<string> {
@@ -65,6 +69,7 @@ export async function createProduct(input: ProductInput): Promise<string> {
           product_id: product.id,
           size: v.size,
           stock_quantity: v.stockQuantity,
+          weight_grams: v.weightGrams,
         })),
       );
     if (variantError) throw variantError;
@@ -112,6 +117,7 @@ export async function updateProduct(
           product_id: id,
           size: v.size,
           stock_quantity: v.stockQuantity,
+          weight_grams: v.weightGrams,
         })),
       );
     if (variantError) throw variantError;

@@ -1,36 +1,23 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BOB Retail
 
-## Getting Started
+Streetwear e-commerce storefront built for a client. Guest-only — no customer accounts, guest cart/wishlist/checkout.
 
-First, run the development server:
+Stack: Next.js 16 (App Router) + React + TypeScript + Tailwind CSS + Bun + Supabase (Postgres).
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+For full architecture notes, current status, and what's left to build, see [`docs/project-status.md`](docs/project-status.md) — that file is the source of truth and is kept up to date as the project changes. Design direction and creative brief live in [`docs/design-direction.md`](docs/design-direction.md).
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Getting started
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. `bun install`
+2. Create `.env.local` (see `.env.example` for the required variable names) with:
+   - `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` — from the Supabase dashboard ("bob-retail" project) → Project Settings → API.
+   - `NOVA_POST_API_KEY` — personal Nova Poshta API key from `my.novaposhta.ua`.
+3. `bun run dev`
+4. Storefront at `http://localhost:3000`, admin panel at `/admin/login`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Scripts
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `bun run dev` — start the dev server
+- `bun run build` — production build
+- `bun run start` — run a production build
+- `bun run lint` — lint the codebase

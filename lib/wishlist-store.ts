@@ -37,3 +37,7 @@ export const useWishlistStore = create<WishlistState>()(
     { name: "bob-retail-wishlist" },
   ),
 );
+
+export function useWishlistCount() {
+  return useWishlistStore((state) => state.items.length);
+}

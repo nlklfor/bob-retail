@@ -39,6 +39,8 @@ export default function CheckoutPage() {
   const [shippingCost, setShippingCost] = useState<number | null>(null);
   const [resolvedQuoteKey, setResolvedQuoteKey] = useState<string | null>(null);
 
+  const [showOtherPaymentOptions, setShowOtherPaymentOptions] = useState(false);
+
   // City search, debounced. Results are only fetched (not reset) here —
   // whether they're shown is a derived value below, so the effect never
   // needs to setState synchronously on its early-return paths.
@@ -273,6 +275,31 @@ export default function CheckoutPage() {
               )}
             </div>
           </div>
+        </div>
+
+        <div>
+          <button
+            type="button"
+            onClick={() => setShowOtherPaymentOptions((v) => !v)}
+            className="text-sm text-accent hover:underline"
+          >
+            {showOtherPaymentOptions ? "− " : "+ "}Інші варіанти оплати
+          </button>
+          {showOtherPaymentOptions ? (
+            <div className="mt-3 space-y-2">
+              <div className="flex gap-2">
+                <span className="border border-border px-3 py-2 text-sm uppercase tracking-wide text-muted">
+                  PayPal
+                </span>
+                <span className="border border-border px-3 py-2 text-sm uppercase tracking-wide text-muted">
+                  Крипта
+                </span>
+              </div>
+              <p className="text-sm text-muted">
+                Зверніться до покупця за додатковою інформацією оплати
+              </p>
+            </div>
+          ) : null}
         </div>
 
         {error ? <p className="text-danger text-sm">{error}</p> : null}

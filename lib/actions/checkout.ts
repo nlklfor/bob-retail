@@ -4,8 +4,6 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { resolveShippingCost } from "@/lib/nova-poshta/pricing";
 import { checkoutSchema, type CheckoutInput } from "./checkout-schema";
 
-export type { CheckoutInput };
-
 export type CheckoutResult =
   { success: true; orderId: string } | { success: false; error: string };
 

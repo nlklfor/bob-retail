@@ -36,12 +36,20 @@ Concretely, this suggests:
 
 - Colors: `--bg #0a0a0a`, `--surface #161616`, `--border #2b2b2b`, `--muted #8a8a8a`, `--fg #edebe6`, `--accent #a6c93a` (desaturated acid green), `--danger #c4453d`.
 - Corners: effectively zero everywhere (`--radius-*` overridden to `0px`).
-- Typography: placeholder pairing **Space Grotesk + Public Sans** via `next/font/google` — stand-in for the originally-discussed **Cabinet Grotesk + General Sans** (Fontshare), which need self-hosting we haven't set up yet. Swappable later without touching component code.
+- Typography: **Fixel** (FixelDisplay for headlines, FixelText for body/UI), self-hosted via `next/font/local` from `app/fonts/fixel/`. Chosen specifically because it has full Ukrainian Cyrillic support, unlike the originally-discussed **Cabinet Grotesk + General Sans** (Fontshare) — that pairing is Latin-only and was never actually usable once the site went Ukrainian-only. Free, SIL Open Font License, source: https://fixel.macpaw.com/.
+- Header is a deliberate white/black exception to the dark base palette (`--header-bg`/`--header-fg`) — a contrast band, not a site-wide palette shift. Rest of the site stays on `--bg`/`--fg`.
 
-## Library choices for the animation pass (not yet implemented)
+## Homepage (implemented 2026-08-20)
 
-- **Motion** (formerly Framer Motion) for animations — already the pick per the original creative brief's Performance section ("Framer Motion / Motion where justified"). No new dependency decision needed when we get there, just confirming.
-- **Sonner** for toast notifications (add-to-cart, add-to-wishlist feedback, etc.) — standard lightweight React toast library, handles stacking/timing/accessibility so we don't reinvent it. Its default styling is the generic rounded-card toast look the creative brief explicitly avoids, so it needs restyling to match the sharp-corner/dark palette rather than being used out of the box.
+- **Header**: white/black band, three-column layout — Каталог/Контакти/Питання left, animated wordmark centered, search/wishlist/cart icons right. Logo cycles through 7 unrelated display fonts (Anton, Permanent Marker, Bebas Neue, Archivo Black, Monoton, Righteous, Bungee) continuously, landing conceptually on Fixel Display each pass. Respects `prefers-reduced-motion`.
+- **Intro splash**: full-screen version of the same font-cycle, shown once per browser session on first homepage visit (`sessionStorage`), ~5s, then fades out. Skipped entirely for `prefers-reduced-motion` users and on repeat visits within the session.
+- **Hero**: widescreen band (`aspect-[21/9]`) directly under the header, full-bleed — currently a placeholder ("Місце для банера") sized and positioned for the real logo/brand image once that asset exists.
+- **Product grid**: single clean grid below the hero (not multiple curated carousel sections like snapthatback's New/Sale rows — that would need a "featured" flag and a real sale system that don't exist yet), dark theme, reusing the existing `ProductCard`.
+
+## Library choices for the animation pass
+
+- **Motion** (formerly Framer Motion) — in use for the logo font-cycle and intro splash. Already the pick per the original creative brief's Performance section.
+- **Sonner** for toast notifications (add-to-cart, add-to-wishlist feedback, etc.) — not yet implemented. Standard lightweight React toast library; its default rounded-card styling needs restyling to match the sharp-corner/dark palette rather than being used out of the box.
 
 ## Open questions for the client (not yet asked)
 

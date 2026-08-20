@@ -8,6 +8,12 @@
   --fg: #edebe6;
   --accent: #a6c93a;
   --danger: #c4453d;
+
+  /* Deliberate exception: the header is a white/black contrast band against
+     the dark site, not the dark palette itself — everything else stays on
+     --bg/--fg. */
+  --header-bg: #ffffff;
+  --header-fg: #0a0a0a;
 }
 
 @theme inline {
@@ -18,9 +24,11 @@
   --color-fg: var(--fg);
   --color-accent: var(--accent);
   --color-danger: var(--danger);
+  --color-header-bg: var(--header-bg);
+  --color-header-fg: var(--header-fg);
 
-  --font-display: var(--font-space-grotesk);
-  --font-sans: var(--font-public-sans);
+  --font-display: var(--font-fixel-display);
+  --font-sans: var(--font-fixel-text);
 
   /* the brand direction calls for sharp, near-square corners everywhere */
   --radius-sm: 0px;

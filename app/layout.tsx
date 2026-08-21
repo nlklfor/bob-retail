@@ -51,10 +51,11 @@ const fixelText = localFont({
   display: "swap",
 });
 
-// Logo font-cycle set (components/layout/AnimatedLogo.tsx) — the header
-// wordmark flickers through these on load before landing on Fixel Display,
-// the site's actual display font. Loaded here (not in the client component
-// itself) since next/font only works at the module/build level.
+// Logo font-cycle set (components/home/IntroSplash.tsx) — the homepage
+// intro splash flickers through these before landing on Fixel Display, the
+// site's actual display font. Loaded here (not in the client component
+// itself) since next/font only works at the module/build level. The header
+// itself now uses a looping video logo (VideoLogo.tsx) instead of this cycle.
 const anton = Anton({
   weight: "400",
   variable: "--font-logo-anton",

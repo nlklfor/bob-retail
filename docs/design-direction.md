@@ -7,7 +7,7 @@ Living reference for the design/animation pass (deferred until the functional bu
 - Mood: dark / raw / editorial / underground / futuristic / confident / minimal but expressive.
 - Explicitly avoid: rounded corners, glassmorphism, generic gradients, generic Tailwind/SaaS look, cookie-cutter product cards, stock photography.
 - Sharp geometry, hard edges, asymmetric editorial layouts, oversized typography, full-bleed photography.
-- Color: near-black/graphite/charcoal base, one restrained accent used sparingly (we chose a desaturated acid green — see decisions below).
+- Color: near-black/graphite/charcoal base. **Monochrome, no color accent** (client decision, 2026-08-21) — black/grey/white only, "more underground" than the desaturated acid-green tried earlier. Emphasis (prices, totals, selected states) reads via brightness contrast (pure white against the off-white body text and dark backgrounds), not hue.
 - Typography as a design element itself (scale, weight, tracking), not decoration via rounded UI chrome.
 - Motion: fast/medium/slow tiered system, precise/physical/cinematic easing, never bouncy — every animation must earn its place.
 - Final test: "what the f*** is this, this looks insane" in 3 seconds, "okay this is actually really easy to use" 10 seconds later — distinctive first impression without sacrificing usability.
@@ -28,22 +28,22 @@ The client's own word list pairs "underground/rap/graffiti" with "clarity" — r
 
 Concretely, this suggests:
 
-- Keep the dark near-black palette + acid-green accent already implemented in `app/globals.css`.
+- Keep the dark near-black palette (accent color has since been dropped in favor of monochrome — see Design tokens below).
 - Borrow from the reference site: confident, consistent product photography treatment; a clear, uncluttered grid for the catalog; unambiguous navigation — don't let "editorial/experimental" layout choices hurt the actual ease of finding and buying a product.
 - Graffiti/rap/underground culture cues belong in typography treatment, texture (film grain, subtle noise — already in the original brief), photography styling, and possibly hand-drawn/spray-paint-influenced display type accents — not in the base UI chrome (buttons, nav, forms), which should stay closer to "clear and usable" per the client's own "clarity" note.
 
 ## Design tokens already implemented (as of this build)
 
-- Colors: `--bg #0a0a0a`, `--surface #161616`, `--border #2b2b2b`, `--muted #8a8a8a`, `--fg #edebe6`, `--accent #a6c93a` (desaturated acid green), `--danger #c4453d`.
+- Colors: `--bg #0a0a0a`, `--surface #161616`, `--border #2b2b2b`, `--muted #8a8a8a`, `--fg #edebe6`, `--accent #ffffff` (monochrome — pure white for emphasis, not a color accent), `--danger #c4453d` (kept red — semantic/error color, exempt from the monochrome decision).
 - Corners: effectively zero everywhere (`--radius-*` overridden to `0px`).
 - Typography: **Fixel** (FixelDisplay for headlines, FixelText for body/UI), self-hosted via `next/font/local` from `app/fonts/fixel/`. Chosen specifically because it has full Ukrainian Cyrillic support, unlike the originally-discussed **Cabinet Grotesk + General Sans** (Fontshare) — that pairing is Latin-only and was never actually usable once the site went Ukrainian-only. Free, SIL Open Font License, source: https://fixel.macpaw.com/.
 - Header is a deliberate white/black exception to the dark base palette (`--header-bg`/`--header-fg`) — a contrast band, not a site-wide palette shift. Rest of the site stays on `--bg`/`--fg`.
 
-## Homepage (implemented 2026-08-20)
+## Homepage (implemented 2026-08-20, updated 2026-08-21)
 
-- **Header**: white/black band, three-column layout — Каталог/Контакти/Питання left, animated wordmark centered, search/wishlist/cart icons right. Logo cycles through 7 unrelated display fonts (Anton, Permanent Marker, Bebas Neue, Archivo Black, Monoton, Righteous, Bungee) continuously, landing conceptually on Fixel Display each pass. Respects `prefers-reduced-motion`.
-- **Intro splash**: full-screen version of the same font-cycle, shown once per browser session on first homepage visit (`sessionStorage`), ~5s, then fades out. Skipped entirely for `prefers-reduced-motion` users and on repeat visits within the session.
-- **Hero**: widescreen band (`aspect-[21/9]`) directly under the header, full-bleed — currently a placeholder ("Місце для банера") sized and positioned for the real logo/brand image once that asset exists.
+- **Header**: white/black band, three-column layout — Каталог/Контакти/Питання left, logo centered, search/wishlist/cart icons right. Logo is a small looped video (`components/layout/VideoLogo.tsx`, client-supplied clip) rather than the font-cycle animation originally built — that font-cycle set is still loaded and used by the intro splash below. Header height is intentionally compact; the homepage hero's height is kept in sync with it via a hardcoded `calc()` (see Header note in that component/page — re-measure and update both if header sizing changes again).
+- **Intro splash**: full-screen font-cycle animation (Anton, Permanent Marker, Bebas Neue, Archivo Black, Monoton, Righteous, Bungee → Fixel Display), shown once per browser session on first homepage visit (`sessionStorage`), ~5s, then fades out. Skipped entirely for `prefers-reduced-motion` users and on repeat visits within the session.
+- **Hero**: full-screen (fills the viewport exactly below the header, `h-[calc(100vh-Npx)]`), full-bleed, real background image (`public/images/bob-bg.png`, client-supplied) via `next/image` with `object-cover`. A "Прокрутіть вниз" bouncing scroll indicator sits at the bottom (Motion, respects reduced-motion, actually scrolls to the product grid on click), with a dark gradient behind it for legibility regardless of the image content underneath.
 - **Product grid**: single clean grid below the hero (not multiple curated carousel sections like snapthatback's New/Sale rows — that would need a "featured" flag and a real sale system that don't exist yet), dark theme, reusing the existing `ProductCard`.
 
 ## Library choices for the animation pass

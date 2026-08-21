@@ -7,10 +7,9 @@ const SESSION_KEY = "bob-intro-seen";
 const DURATION_MS = 5000;
 const CYCLE_INTERVAL_MS = 260;
 
-// Same font set as the header's AnimatedLogo, at full-screen scale — the
-// "what is this" moment before the site reveals itself. Shows once per
-// browser session (not on every homepage visit) and never for
-// prefers-reduced-motion users.
+// Font-cycle wordmark at full-screen scale — the "what is this" moment
+// before the site reveals itself. Shows once per browser session (not on
+// every homepage visit) and never for prefers-reduced-motion users.
 const INTRO_FONTS = [
   "var(--font-logo-anton)",
   "var(--font-logo-marker)",

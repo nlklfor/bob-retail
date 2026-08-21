@@ -6,7 +6,11 @@
   --border-color: #2b2b2b;
   --muted: #8a8a8a;
   --fg: #edebe6;
-  --accent: #a6c93a;
+  /* Monochrome brand palette — no color accent, just contrast. Pure white
+     (brighter than --fg's off-white) for anything that needs to read as
+     "emphasis": prices, totals, selected states. --danger stays red — that's
+     a semantic/functional color (errors), not a brand accent choice. */
+  --accent: #ffffff;
   --danger: #c4453d;
 
   /* Deliberate exception: the header is a white/black contrast band against

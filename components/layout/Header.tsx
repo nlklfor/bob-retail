@@ -3,8 +3,7 @@ import { VideoLogo } from "./VideoLogo";
 import { SearchToggle } from "./SearchToggle";
 import { MobileMenu } from "./MobileMenu";
 import { CartBadge } from "./CartBadge";
-import { WishlistBadge } from "./WishlistBadge";
-import { HeartIcon, BagIcon } from "./icons";
+import { BagIcon } from "./icons";
 
 // Fixed height (not content-driven) so it stays identical across
 // breakpoints — the homepage hero syncs its own height to this exact value
@@ -38,14 +37,6 @@ export function Header() {
 
         <div className="flex items-center justify-end gap-3 sm:gap-5">
           <SearchToggle />
-          <Link
-            href="/wishlist"
-            aria-label="Список бажань"
-            className="relative flex h-9 w-9 items-center justify-center hover:opacity-60"
-          >
-            <HeartIcon />
-            <WishlistBadge />
-          </Link>
           <Link
             href="/cart"
             aria-label="Кошик"

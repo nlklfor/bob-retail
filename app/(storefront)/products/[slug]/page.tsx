@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import { getProductBySlug } from "@/lib/products";
 import { AddToCartForm } from "@/components/product/AddToCartForm";
-import { WishlistButton } from "@/components/product/WishlistButton";
 
 export default async function ProductPage({
   params,
@@ -41,19 +40,8 @@ export default async function ProductPage({
           </p>
         ) : null}
 
-        <div className="mt-8 flex gap-3">
-          <div className="flex-1">
-            <AddToCartForm product={product} />
-          </div>
-          <WishlistButton
-            item={{
-              productId: product.id,
-              name: product.name,
-              price: product.price,
-              slug: product.slug,
-              image: product.images[0] ?? null,
-            }}
-          />
+        <div className="mt-8">
+          <AddToCartForm product={product} />
         </div>
       </div>
     </div>

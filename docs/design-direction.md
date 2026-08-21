@@ -49,7 +49,7 @@ Concretely, this suggests:
 ## Library choices for the animation pass
 
 - **Motion** (formerly Framer Motion) — in use for the logo font-cycle and intro splash. Already the pick per the original creative brief's Performance section.
-- **Sonner** for toast notifications (add-to-cart, add-to-wishlist feedback, etc.) — not yet implemented. Standard lightweight React toast library; its default rounded-card styling needs restyling to match the sharp-corner/dark palette rather than being used out of the box.
+- **Sonner** for toast notifications (add-to-cart feedback, etc.) — not yet implemented. Standard lightweight React toast library; its default rounded-card styling needs restyling to match the sharp-corner/dark palette rather than being used out of the box.
 
 ## Open questions for the client (not yet asked)
 

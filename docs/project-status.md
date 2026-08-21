@@ -4,7 +4,9 @@ Single source of truth if you're picking this project back up cold (new machine,
 
 ## What this is
 
-BOB Retail: a streetwear e-commerce site, built for a client (not the developer's own business). Guest-only — no customer accounts, guest cart/wishlist/checkout. Stack: Next.js 16 (App Router) + React + TypeScript + Tailwind CSS + Bun + Supabase (Postgres).
+BOB Retail: a streetwear e-commerce site, built for a client (not the developer's own business). Guest-only — no customer accounts, guest cart/checkout. Stack: Next.js 16 (App Router) + React + TypeScript + Tailwind CSS + Bun + Supabase (Postgres).
+
+No wishlist — removed 2026-08-21 (client decision). If it comes back later, the pattern to follow is the cart's: a Zustand store with `persist` (localStorage), guest-only, matching the no-accounts requirement.
 
 ## Recovering after a fresh machine / Windows reset
 
@@ -21,7 +23,7 @@ Your code is safe — everything is pushed to `https://github.com/nlklfor/bob-re
 - **Schema**: `categories`, `products` (price + `images[]` live here, not on variants), `product_variants` (just `size` + `stock_quantity` — one row per size, real independent stock per size), `orders` / `order_items` / `payments`. RLS on everything; `orders`/`order_items`/`payments` have **zero** anon policies — guests never touch them directly.
 - **Checkout correctness**: `place_order()` is a Postgres function (`security definer`, granted only to `service_role`) that locks each variant row (`FOR UPDATE`), re-validates real price/stock from the database (never trusts client input), decrements stock, and writes the order — all in one transaction. This is the actual fix for the "two customers buy the last pair at once" race condition, not just a description of it.
 - **Admin auth**: Supabase Auth, no public signup anywhere — any account that exists was created manually, so "has a valid session" already means "is staff." `requireStaffSession()` (a DAL function) is checked both in the protected layout and independently in every admin page/Server Action, per Next.js's own guidance that layout-only checks aren't reliable across client-side navigation.
-- **Cart/wishlist**: Zustand stores with `persist` (localStorage), guest-only, client-side — matches the no-accounts requirement.
+- **Cart**: Zustand store with `persist` (localStorage), guest-only, client-side — matches the no-accounts requirement.
 - **Routing**: `app/(storefront)/` (Header/Footer layout) vs `app/admin/` (`login/` outside the protected group to avoid a redirect loop, `(protected)/` wraps the actual staff pages). Route groups `()` don't affect URLs; `[param]` folders are real dynamic route segments.
 - **Types**: plain hand-written flat interfaces in `lib/types.ts`, not the full Supabase-generated `Database`/`Row`/`Insert`/`Update` generics — deliberate readability trade-off for a small single-developer project. Documented as a reasonable future upgrade, not a permanent ceiling.
 
@@ -44,15 +46,15 @@ All tables live in `public`, RLS enabled everywhere, migrations are incremental 
 
 - **Package manager**: Bun (`bun install`, `bun run dev`).
 - **Linting/formatting**: ESLint (`eslint.config.mjs`, `eslint-config-next`) + Prettier, wired to run automatically pre-commit via `simple-git-hooks` + `lint-staged` (see `package.json`) — staged `.ts`/`.tsx` files get `eslint --fix` + `prettier --write`, staged `.json`/`.css`/`.md` get `prettier --write`.
-- **Testing**: none yet. No test runner is configured — worth setting up before the Monobank integration lands, since that's the highest-stakes code path (real money).
+- **Testing**: `bun test` (Bun's built-in runner). 22 tests covering the Nova Poshta client, `resolveShippingCost`, and the checkout schema — the highest-stakes logic. `test/setup.ts` (via `bunfig.toml`) stubs the `server-only` package for tests, since it otherwise throws outside Next's own bundler condition.
 - **Types**: hand-written flat interfaces in `lib/types.ts` rather than Supabase's generated `Database`/`Row`/`Insert`/`Update` generics — see the note under Architecture snapshot.
 
 ## What's built and working
 
-- Storefront: homepage, `/catalog` (category filter via `?category=`), `/products/[slug]` (stock-aware size selection), `/cart`, `/wishlist`, `/checkout` → `/order/[id]` confirmation.
+- Storefront: homepage (full-screen hero, scroll indicator, product grid), `/catalog` (category filter via `?category=`), `/products/[slug]` (stock-aware size selection), `/cart`, `/checkout` → `/order/[id]` confirmation, `/faq`, `/contacts`.
 - Admin panel (`/admin`): staff login, product list/create/edit (with variants, device image upload to Supabase Storage, slug auto-fill from name), order list/detail with status updates.
 - Full order lifecycle enum: `pending_payment → paid → processing → shipped → completed`, plus `cancelled`/`payment_failed`.
-- Design tokens: near-black/graphite palette, desaturated acid-green accent, near-zero corner radii, applied via Tailwind v4's `@theme` in `app/globals.css`.
+- Design tokens: near-black/graphite palette, monochrome (no color accent — pure white for emphasis instead), near-zero corner radii, applied via Tailwind v4's `@theme` in `app/globals.css`. Fixel (self-hosted) for typography, full Ukrainian Cyrillic support.
 
 ## What's explicitly stubbed — not real yet, flagged in code comments
 

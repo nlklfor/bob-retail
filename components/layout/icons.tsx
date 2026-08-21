@@ -19,22 +19,6 @@ export function SearchIcon() {
   );
 }
 
-export function HeartIcon() {
-  return (
-    <svg
-      width="19"
-      height="19"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      aria-hidden="true"
-    >
-      <path d="M12 20.2s-7.2-4.4-9.6-8.7C.6 7.8 2.2 3.8 6.2 3.8c2.1 0 3.6 1.3 4.2 2.7.6-1.4 2.1-2.7 4.2-2.7 4 0 5.6 4 3.8 7.7-2.4 4.3-9.6 8.7-9.6 8.7z" />
-    </svg>
-  );
-}
-
 export function BagIcon() {
   return (
     <svg

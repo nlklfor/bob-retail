@@ -16,9 +16,9 @@
 
 ## Overview
 
-BOB Retail is a guest-only e-commerce storefront for a streetwear client — no accounts, no friction: browse, add to cart or wishlist, check out as a guest. Built on Next.js 16's App Router with a Postgres/Supabase backend, it's designed around one non-negotiable: **the server never trusts the client.** Prices, stock, and availability are always re-verified in the database at the moment of purchase, not taken from whatever the browser sends.
+BOB Retail is a guest-only e-commerce storefront for a streetwear client — no accounts, no friction: browse, add to cart, check out as a guest. Built on Next.js 16's App Router with a Postgres/Supabase backend, it's designed around one non-negotiable: **the server never trusts the client.** Prices, stock, and availability are always re-verified in the database at the moment of purchase, not taken from whatever the browser sends.
 
-Visual direction is dark, raw, and editorial — near-black palette, a single restrained acid-green accent, zero rounded corners — with a full design/animation pass intentionally deferred until the functional build is airtight. See [`docs/design-direction.md`](docs/design-direction.md) for the creative brief.
+Visual direction is dark, raw, and editorial — near-black palette, monochrome (no color accent, just black/grey/white contrast), zero rounded corners, self-hosted Fixel typography with full Ukrainian Cyrillic support. See [`docs/design-direction.md`](docs/design-direction.md) for the creative brief.
 
 ## Highlights
 
@@ -36,7 +36,7 @@ Visual direction is dark, raw, and editorial — near-black palette, a single re
 | Styling                   | Tailwind CSS v4 (`@theme` design tokens)                   |
 | Database                  | Supabase (Postgres), Row Level Security throughout         |
 | Auth                      | Supabase Auth (staff-only, no public signup)               |
-| Client state              | Zustand (`persist` → localStorage) for guest cart/wishlist |
+| Client state              | Zustand (`persist` → localStorage) for the guest cart      |
 | Validation                | Zod                                                        |
 | Runtime / package manager | Bun                                                        |
 
@@ -44,10 +44,11 @@ Visual direction is dark, raw, and editorial — near-black palette, a single re
 
 | Area                                                             | Status                                                    |
 | ---------------------------------------------------------------- | --------------------------------------------------------- |
-| Storefront (catalog, product pages, cart, wishlist, checkout)    | ✅ Built                                                  |
+| Storefront (catalog, product pages, cart, checkout)              | ✅ Built                                                  |
 | Admin panel (products, variants, image upload, order management) | ✅ Built                                                  |
 | Atomic, stock-safe checkout (`place_order()`)                    | ✅ Built                                                  |
 | Nova Poshta branch search & real shipping cost                   | ✅ Built — live city/branch search + dynamic cost quote   |
+| Test suite (`bun test`)                                          | ✅ Built — Nova Poshta client, pricing, checkout schema   |
 | Monobank payment integration                                     | ⏳ Blocked — waiting on client's business Acquiring token |
 | Fiscal receipts (РРО/ПРРО)                                       | ⏳ Planned — pending client's accountant/provider choice  |
 | Design & motion pass                                             | ⏳ Deferred — functional build first                      |
@@ -87,12 +88,13 @@ bun run dev
 | `bun run build` | Production build                 |
 | `bun run start` | Run a production build           |
 | `bun run lint`  | Lint the codebase                |
+| `bun test`      | Run the test suite               |
 
 ## Project structure
 
 ```
 app/
-  (storefront)/     storefront routes — home, catalog, product, cart, wishlist, checkout
+  (storefront)/     storefront routes — home, catalog, product, cart, checkout, faq, contacts
   admin/             staff-only routes — login outside the auth group, everything else inside (protected)/
 lib/
   actions/           Server Actions (checkout, admin auth, product/order mutations)

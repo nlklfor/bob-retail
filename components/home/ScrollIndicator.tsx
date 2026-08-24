@@ -1,9 +1,10 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
+import { useReducedMotionAware } from "@/lib/useReducedMotionAware";
 
 export function ScrollIndicator({ targetId }: { targetId: string }) {
-  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotion = useReducedMotionAware();
 
   function handleClick() {
     document.getElementById(targetId)?.scrollIntoView({ behavior: "smooth" });
@@ -14,7 +15,10 @@ export function ScrollIndicator({ targetId }: { targetId: string }) {
       type="button"
       onClick={handleClick}
       aria-label="Прокрутити вниз"
-      className="absolute inset-x-0 bottom-8 flex flex-col items-center gap-2 text-fg"
+      // Deliberately hardcoded white, not text-fg — this sits over the hero
+      // photo + a dark gradient (see the page), independent of the site's
+      // light/dark theme.
+      className="absolute inset-x-0 bottom-8 flex flex-col items-center gap-2 text-white"
     >
       <span className="text-xs uppercase tracking-[0.2em]">
         Прокрутіть вниз

@@ -5,10 +5,10 @@ export function VideoLogo() {
     <Link
       href="/"
       aria-label="BOB — на головну"
-      className="block h-20 w-20 overflow-hidden"
+      className="block h-24 w-24 overflow-hidden"
     >
       <video
-        src="/video/bob_logo_anim.mp4"
+        src="/video/frombobwithlove-logo-anim.mp4"
         autoPlay
         loop
         muted

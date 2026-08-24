@@ -5,9 +5,9 @@ import { ProductCard } from "@/components/product/ProductCard";
 export default async function CatalogPage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string }>;
+  searchParams: Promise<{ category?: string; q?: string }>;
 }) {
-  const { category } = await searchParams;
+  const { category, q } = await searchParams;
   const [products, categories] = await Promise.all([
     getActiveProducts(),
     getCategories(),
@@ -16,9 +16,11 @@ export default async function CatalogPage({
   const activeCategory = category
     ? categories.find((c) => c.slug === category)
     : null;
-  const filtered = activeCategory
-    ? products.filter((p) => p.category_id === activeCategory.id)
-    : products;
+  const query = q?.trim().toLocaleLowerCase("uk") ?? "";
+
+  const filtered = products
+    .filter((p) => !activeCategory || p.category_id === activeCategory.id)
+    .filter((p) => !query || p.name.toLocaleLowerCase("uk").includes(query));
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-12">
@@ -26,10 +28,16 @@ export default async function CatalogPage({
         Каталог
       </h1>
 
+      {query ? (
+        <p className="mt-2 text-sm text-muted">
+          Результати пошуку за запитом «{q?.trim()}»
+        </p>
+      ) : null}
+
       <div className="mt-4 flex gap-4 text-sm uppercase tracking-wide">
         <Link
           href="/catalog"
-          className={!category ? "text-accent" : "text-muted hover:text-fg"}
+          className={!category ? "text-highlight" : "text-muted hover:text-fg"}
         >
           Усі
         </Link>
@@ -38,7 +46,9 @@ export default async function CatalogPage({
             key={c.id}
             href={`/catalog?category=${c.slug}`}
             className={
-              category === c.slug ? "text-accent" : "text-muted hover:text-fg"
+              category === c.slug
+                ? "text-highlight"
+                : "text-muted hover:text-fg"
             }
           >
             {c.name}
@@ -47,7 +57,11 @@ export default async function CatalogPage({
       </div>
 
       {filtered.length === 0 ? (
-        <p className="mt-8 text-muted">У цій категорії поки немає товарів.</p>
+        <p className="mt-8 text-muted">
+          {query
+            ? "За вашим запитом нічого не знайдено."
+            : "У цій категорії поки немає товарів."}
+        </p>
       ) : (
         <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
           {filtered.map((product) => (

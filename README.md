@@ -2,7 +2,7 @@
 
 # BOB Retail
 
-**A dark, editorial streetwear storefront — built server-first, secured by default.**
+**A raw, editorial streetwear storefront — built server-first, secured by default.**
 
 ![Next.js](https://img.shields.io/badge/Next.js_16-000000?style=for-the-badge&logo=next.js&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
@@ -18,7 +18,7 @@
 
 BOB Retail is a guest-only e-commerce storefront for a streetwear client — no accounts, no friction: browse, add to cart, check out as a guest. Built on Next.js 16's App Router with a Postgres/Supabase backend, it's designed around one non-negotiable: **the server never trusts the client.** Prices, stock, and availability are always re-verified in the database at the moment of purchase, not taken from whatever the browser sends.
 
-Visual direction is dark, raw, and editorial — near-black palette, monochrome (no color accent, just black/grey/white contrast), zero rounded corners, self-hosted Fixel typography with full Ukrainian Cyrillic support. See [`docs/design-direction.md`](docs/design-direction.md) for the creative brief.
+Visual direction is raw and editorial — white/black monochrome (no color accent, just contrast; the footer is the one deliberate dark exception), zero rounded corners, self-hosted Fixel typography with full Ukrainian Cyrillic support. See [`docs/design-direction.md`](docs/design-direction.md) for the creative brief.
 
 ## Highlights
 
@@ -94,7 +94,7 @@ bun run dev
 
 ```
 app/
-  (storefront)/     storefront routes — home, catalog, product, cart, checkout, faq, contacts
+  (storefront)/     storefront routes — home, catalog, product, checkout (cart + checkout combined), faq, contacts
   admin/             staff-only routes — login outside the auth group, everything else inside (protected)/
 lib/
   actions/           Server Actions (checkout, admin auth, product/order mutations)

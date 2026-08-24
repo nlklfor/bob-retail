@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCartStore, useCartSubtotal } from "@/lib/cart-store";
 import { placeOrderAction } from "@/lib/actions/checkout";
@@ -15,6 +17,11 @@ import type {
 } from "@/lib/nova-poshta/client";
 
 const DEBOUNCE_MS = 350;
+
+// Underline-only fields (no boxed border) — matches the reference layout's
+// minimal input style; placeholder doubles as the label, same as before.
+const FIELD_CLASS =
+  "w-full border-0 border-b border-border bg-transparent px-0 py-2 placeholder:text-muted focus:border-fg focus:outline-none";
 
 export default function CheckoutPage() {
   const items = useCartStore((state) => state.items);
@@ -132,8 +139,11 @@ export default function CheckoutPage() {
     setError(null);
 
     const formData = new FormData(e.currentTarget);
+    const firstName = String(formData.get("firstName") ?? "").trim();
+    const lastName = String(formData.get("lastName") ?? "").trim();
+
     const result = await placeOrderAction({
-      customerName: String(formData.get("customerName") ?? ""),
+      customerName: `${firstName} ${lastName}`.trim(),
       customerPhone: String(formData.get("customerPhone") ?? ""),
       customerEmail: String(formData.get("customerEmail") ?? ""),
       shippingCity: selectedCity.name,
@@ -159,10 +169,13 @@ export default function CheckoutPage() {
   if (items.length === 0) {
     return (
       <div className="mx-auto max-w-6xl px-6 py-12">
-        <h1 className="font-display text-3xl uppercase tracking-tight">
-          Оформлення замовлення
+        <h1 className="font-display text-5xl uppercase tracking-tight sm:text-6xl">
+          Кошик
         </h1>
         <p className="mt-8 text-muted">Ваш кошик порожній.</p>
+        <Link href="/catalog" className="mt-4 inline-block text-highlight">
+          Продовжити покупки
+        </Link>
       </div>
     );
   }
@@ -171,186 +184,218 @@ export default function CheckoutPage() {
   const total = subtotal + (visibleShippingCost ?? 0);
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-12 grid gap-10 sm:grid-cols-2">
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <h2 className="text-sm uppercase tracking-wide text-muted mb-3">
-            Контактні дані
-          </h2>
-          <div className="space-y-3">
-            <input
-              name="customerName"
-              placeholder="Повне ім'я"
-              required
-              className="w-full border border-border bg-transparent px-3 py-2"
-            />
-            <input
-              name="customerPhone"
-              placeholder="Телефон"
-              required
-              className="w-full border border-border bg-transparent px-3 py-2"
-            />
-            <input
-              name="customerEmail"
-              type="email"
-              placeholder="Email (необов'язково)"
-              className="w-full border border-border bg-transparent px-3 py-2"
-            />
-          </div>
-        </div>
+    <div className="mx-auto max-w-6xl px-6 py-12">
+      <h1 className="font-display text-5xl uppercase tracking-tight sm:text-6xl">
+        Кошик
+      </h1>
 
-        <div>
-          <h2 className="text-sm uppercase tracking-wide text-muted mb-3">
-            Доставка Новою Поштою
-          </h2>
-          <div className="space-y-3">
-            <div className="relative">
+      <div className="mt-12 grid gap-16 lg:grid-cols-2">
+        <form onSubmit={handleSubmit} className="space-y-10">
+          <section>
+            <h2 className="text-xl font-semibold">Контактні дані</h2>
+            <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3">
               <input
-                value={cityQuery}
-                onChange={(e) => {
-                  setCityQuery(e.target.value);
-                  if (selectedCity && e.target.value !== selectedCity.name) {
-                    setSelectedCity(null);
-                  }
-                }}
-                placeholder="Місто"
+                name="firstName"
+                placeholder="Ім'я"
                 required
-                autoComplete="off"
-                className="w-full border border-border bg-transparent px-3 py-2"
+                className={FIELD_CLASS}
               />
-              {visibleCityResults.length > 0 && (
-                <ul className="absolute z-10 mt-1 w-full max-h-60 overflow-y-auto border border-border bg-bg">
-                  {visibleCityResults.map((city) => (
-                    <li key={city.ref}>
-                      <button
-                        type="button"
-                        onClick={() => selectCity(city)}
-                        className="block w-full px-3 py-2 text-left text-sm hover:bg-surface"
-                      >
-                        {city.name}
-                        {city.area ? (
-                          <span className="text-muted"> · {city.area}</span>
-                        ) : null}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-
-            <div className="relative">
               <input
-                value={warehouseQuery}
-                onChange={(e) => {
-                  setWarehouseQuery(e.target.value);
-                  if (
-                    selectedWarehouse &&
-                    e.target.value !== selectedWarehouse.description
-                  ) {
-                    setSelectedWarehouse(null);
-                  }
-                }}
-                placeholder={
-                  selectedCity ? "Відділення" : "Спочатку оберіть місто"
-                }
+                name="lastName"
+                placeholder="Прізвище"
                 required
-                disabled={!selectedCity}
-                autoComplete="off"
-                className="w-full border border-border bg-transparent px-3 py-2 disabled:opacity-40"
+                className={FIELD_CLASS}
               />
-              {visibleWarehouseResults.length > 0 && (
-                <ul className="absolute z-10 mt-1 w-full max-h-60 overflow-y-auto border border-border bg-bg">
-                  {visibleWarehouseResults.map((warehouse) => (
-                    <li key={warehouse.ref}>
-                      <button
-                        type="button"
-                        onClick={() => selectWarehouse(warehouse)}
-                        className="block w-full px-3 py-2 text-left text-sm hover:bg-surface"
-                      >
-                        {warehouse.description}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
+              <input
+                name="customerPhone"
+                placeholder="Телефон"
+                required
+                className={FIELD_CLASS}
+              />
+              <input
+                name="customerEmail"
+                type="email"
+                placeholder="Email (необов'язково)"
+                className={FIELD_CLASS}
+              />
             </div>
-          </div>
-        </div>
+          </section>
 
-        <div>
-          <button
-            type="button"
-            onClick={() => setShowOtherPaymentOptions((v) => !v)}
-            className="text-sm text-accent hover:underline"
-          >
-            {showOtherPaymentOptions ? "− " : "+ "}Інші варіанти оплати
-          </button>
-          {showOtherPaymentOptions ? (
-            <div className="mt-3 space-y-2">
-              <div className="flex gap-2">
-                <span className="border border-border px-3 py-2 text-sm uppercase tracking-wide text-muted">
-                  PayPal
-                </span>
-                <span className="border border-border px-3 py-2 text-sm uppercase tracking-wide text-muted">
-                  Крипта
-                </span>
+          <section>
+            <h2 className="text-xl font-semibold">Доставка Новою Поштою</h2>
+            <div className="mt-4 space-y-3">
+              <div className="relative">
+                <input
+                  value={cityQuery}
+                  onChange={(e) => {
+                    setCityQuery(e.target.value);
+                    if (selectedCity && e.target.value !== selectedCity.name) {
+                      setSelectedCity(null);
+                    }
+                  }}
+                  placeholder="Місто"
+                  required
+                  autoComplete="off"
+                  className={FIELD_CLASS}
+                />
+                {visibleCityResults.length > 0 && (
+                  <ul className="absolute z-10 mt-1 w-full max-h-60 overflow-y-auto border border-border bg-bg">
+                    {visibleCityResults.map((city) => (
+                      <li key={city.ref}>
+                        <button
+                          type="button"
+                          onClick={() => selectCity(city)}
+                          className="block w-full px-3 py-2 text-left text-sm hover:bg-surface"
+                        >
+                          {city.name}
+                          {city.area ? (
+                            <span className="text-muted"> · {city.area}</span>
+                          ) : null}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
-              <p className="text-sm text-muted">
-                Зверніться до покупця за додатковою інформацією оплати
-              </p>
+
+              <div className="relative">
+                <input
+                  value={warehouseQuery}
+                  onChange={(e) => {
+                    setWarehouseQuery(e.target.value);
+                    if (
+                      selectedWarehouse &&
+                      e.target.value !== selectedWarehouse.description
+                    ) {
+                      setSelectedWarehouse(null);
+                    }
+                  }}
+                  placeholder={
+                    selectedCity ? "Відділення" : "Спочатку оберіть місто"
+                  }
+                  required
+                  disabled={!selectedCity}
+                  autoComplete="off"
+                  className={`${FIELD_CLASS} disabled:opacity-40`}
+                />
+                {visibleWarehouseResults.length > 0 && (
+                  <ul className="absolute z-10 mt-1 w-full max-h-60 overflow-y-auto border border-border bg-bg">
+                    {visibleWarehouseResults.map((warehouse) => (
+                      <li key={warehouse.ref}>
+                        <button
+                          type="button"
+                          onClick={() => selectWarehouse(warehouse)}
+                          className="block w-full px-3 py-2 text-left text-sm hover:bg-surface"
+                        >
+                          {warehouse.description}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
             </div>
-          ) : null}
-        </div>
+          </section>
 
-        {error ? <p className="text-danger text-sm">{error}</p> : null}
+          <section>
+            <h2 className="text-xl font-semibold">Оплата</h2>
+            <div className="mt-4 space-y-3">
+              <div className="flex items-center gap-3 border-b border-border py-3">
+                <span className="flex h-4 w-4 flex-none items-center justify-center rounded-full border border-highlight">
+                  <span className="h-2 w-2 rounded-full bg-highlight" />
+                </span>
+                <span className="text-sm">Оплата карткою (Monobank)</span>
+              </div>
 
-        <button
-          type="submit"
-          disabled={submitting || !canSubmit}
-          className="w-full border border-fg py-3 text-sm uppercase tracking-wide hover:bg-fg hover:text-bg disabled:opacity-30"
-        >
-          {submitting ? "Оформлення..." : "Оформити замовлення"}
-        </button>
-      </form>
+              <button
+                type="button"
+                onClick={() => setShowOtherPaymentOptions((v) => !v)}
+                className="text-sm text-highlight hover:underline"
+              >
+                {showOtherPaymentOptions ? "− " : "+ "}Інші варіанти оплати
+              </button>
+              {showOtherPaymentOptions ? (
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <span className="border border-border px-3 py-2 text-sm uppercase tracking-wide text-muted">
+                      PayPal
+                    </span>
+                    <span className="border border-border px-3 py-2 text-sm uppercase tracking-wide text-muted">
+                      Крипта
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted">
+                    Зверніться до покупця за додатковою інформацією оплати
+                  </p>
+                </div>
+              ) : null}
+            </div>
+          </section>
 
-      <div>
-        <h2 className="text-sm uppercase tracking-wide text-muted mb-3">
-          Підсумок замовлення
-        </h2>
-        <div className="divide-y divide-border">
-          {items.map((item) => (
-            <div
-              key={item.variantId}
-              className="flex justify-between py-3 text-sm"
-            >
+          {error ? <p className="text-danger text-sm">{error}</p> : null}
+
+          <button
+            type="submit"
+            disabled={submitting || !canSubmit}
+            className="w-full bg-fg py-4 text-sm uppercase tracking-wide text-bg hover:opacity-90 disabled:opacity-30"
+          >
+            {submitting ? "Оформлення..." : "Оформити замовлення"}
+          </button>
+        </form>
+
+        <div>
+          <h2 className="text-xl font-semibold">Кошик ({items.length})</h2>
+          <div className="mt-4 divide-y divide-border">
+            {items.map((item) => (
+              <div key={item.variantId} className="flex gap-4 py-4">
+                <div className="relative h-24 w-20 flex-none bg-surface">
+                  {item.image ? (
+                    <Image
+                      src={item.image}
+                      alt={item.name}
+                      fill
+                      sizes="80px"
+                      className="object-cover"
+                    />
+                  ) : null}
+                </div>
+                <div className="flex flex-1 flex-col justify-between">
+                  <div className="flex justify-between gap-4">
+                    <p className="text-sm">{item.name}</p>
+                    <p className="flex-none text-sm">
+                      {item.price * item.quantity} грн
+                    </p>
+                  </div>
+                  <div className="text-sm text-muted">
+                    {item.size ? <p>Розмір: {item.size}</p> : null}
+                    <p>Кількість: {item.quantity}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-6 space-y-2 border-t border-border pt-4">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted">Сума</span>
+              <span>{subtotal} грн</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-muted">Доставка</span>
               <span>
-                {item.name} {item.size ? `(${item.size})` : ""} ×{" "}
-                {item.quantity}
+                {!selectedCity
+                  ? "Оберіть місто"
+                  : visibleShippingCostLoading
+                    ? "Розрахунок..."
+                    : visibleShippingCost !== null
+                      ? `${visibleShippingCost} грн`
+                      : "—"}
               </span>
-              <span>{item.price * item.quantity} грн</span>
             </div>
-          ))}
-        </div>
-        <div className="mt-2 space-y-1">
-          <div className="flex justify-between">
-            <span className="uppercase tracking-wide text-sm">Сума</span>
-            <span>{subtotal} грн</span>
-          </div>
-          <div className="flex justify-between text-sm text-muted">
-            <span>Доставка</span>
-            <span>
-              {!selectedCity
-                ? "Оберіть місто"
-                : visibleShippingCostLoading
-                  ? "Розрахунок..."
-                  : visibleShippingCost !== null
-                    ? `${visibleShippingCost} грн`
-                    : "—"}
-            </span>
-          </div>
-          <div className="flex justify-between border-t border-border pt-2 mt-1 text-accent">
-            <span className="uppercase tracking-wide">Разом</span>
-            <span>{total} грн</span>
+            <div className="flex justify-between border-t border-border pt-3 text-lg font-semibold">
+              <span>Разом</span>
+              <span>{total} грн</span>
+            </div>
           </div>
         </div>
       </div>

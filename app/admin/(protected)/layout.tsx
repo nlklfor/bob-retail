@@ -22,6 +22,9 @@ export default async function AdminLayout({
           <Link href="/admin/orders" className="hover:text-accent">
             Замовлення
           </Link>
+          <Link href="/admin/home-content" className="hover:text-accent">
+            Головна
+          </Link>
         </nav>
         <form action={signOutAction}>
           <button type="submit" className="text-sm text-muted hover:text-fg">

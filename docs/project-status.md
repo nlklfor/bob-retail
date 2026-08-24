@@ -51,10 +51,10 @@ All tables live in `public`, RLS enabled everywhere, migrations are incremental 
 
 ## What's built and working
 
-- Storefront: homepage (full-screen hero, scroll indicator, product grid), `/catalog` (category filter via `?category=`), `/products/[slug]` (stock-aware size selection), `/cart`, `/checkout` → `/order/[id]` confirmation, `/faq`, `/contacts`.
-- Admin panel (`/admin`): staff login, product list/create/edit (with variants, device image upload to Supabase Storage, slug auto-fill from name), order list/detail with status updates.
+- Storefront: homepage (full-screen hero, new-arrivals carousel, admin-editable feature banners, category showcase carousel), `/catalog` (category filter via `?category=`, live name-only search via `?q=` plus a debounced dropdown in the header), `/products/[slug]` (stock-aware size selection), `/checkout` (combined cart + checkout — no separate `/cart` page, removed 2026-08-21 since it was a redundant extra step) → `/order/[id]` confirmation, `/faq`, `/contacts`, plus static Про нас/Доставка/Умови оплати/Повернення pages.
+- Admin panel (`/admin`): staff login, product list/create/edit (with variants, device image upload to Supabase Storage, slug auto-fill from name), order list/detail with status updates, and homepage feature-banner editor (`/admin/home-content` — image + caption + linked product per slot).
 - Full order lifecycle enum: `pending_payment → paid → processing → shipped → completed`, plus `cancelled`/`payment_failed`.
-- Design tokens: near-black/graphite palette, monochrome (no color accent — pure white for emphasis instead), near-zero corner radii, applied via Tailwind v4's `@theme` in `app/globals.css`. Fixel (self-hosted) for typography, full Ukrainian Cyrillic support.
+- Design tokens: white/black base + one restrained third color (`--highlight #9184d9`, interactive/link states only — see `docs/design-direction.md`), near-zero corner radii, applied via Tailwind v4's `@theme` in `app/globals.css`. Fixel (self-hosted) for typography, full Ukrainian Cyrillic support. Footer is the one deliberate dark exception to the white base.
 
 ## What's explicitly stubbed — not real yet, flagged in code comments
 
@@ -65,7 +65,7 @@ All tables live in `public`, RLS enabled everywhere, migrations are incremental 
 
 Real, not stubbed: `lib/nova-poshta/client.ts` wraps the live Nova Poshta v2.0 JSON API (`Address.getCities`, `Address.getWarehouses`, `InternetDocument.getDocumentPrice`) — verified directly against the real API with the developer's personal key before shipping. The checkout page (`app/(storefront)/checkout/page.tsx`) has real debounced city/branch autocomplete backed by Server Actions in `lib/actions/nova-poshta.ts`, and shows a live shipping-cost preview.
 
-- **Shipping cost is real and dynamic** (distance/weight-based via Nova Poshta, not a flat number) — but the `Weight` input into that calculation is an estimate: `WEIGHT_PER_ITEM_KG = 0.5` in `lib/nova-poshta/pricing.ts`, since `product_variants` has no real weight column yet. Tune that constant if quoted costs look off; adding real per-variant weights is a later migration + admin form change, not required for this to work.
+- **Shipping cost is real and dynamic** (distance/weight-based via Nova Poshta, not a flat number), using real per-variant weight (`product_variants.weight_grams`, added 2026-08-16) — a fallback constant in `lib/nova-poshta/pricing.ts` only kicks in if a variant is somehow missing (e.g. deleted mid-checkout), not as the normal path.
 - **`resolveShippingCost()`** (`lib/nova-poshta/pricing.ts`) is the single source of truth for shipping cost, called both by the live checkout-page preview and — authoritatively, never trusting whatever the client showed — by `placeOrderAction` itself. Same "server always re-derives, never trusts the client" rule the rest of checkout already followed for price/stock.
 - **Sender city** comes from `NOVA_POST_SENDER_CITY_NAME` (Cyrillic city name, resolved to a Nova Poshta city Ref at runtime and cached in memory). If that env var isn't set, or the Nova Poshta API call fails for any reason, shipping cost falls back to a flat 80 UAH rather than blocking checkout.
 - Nova Poshta's search API only accepts **Cyrillic** input — Latin transliterations (`"Kyiv"`) return a confusing `"FindByString is not specified"` error rather than empty results. Not an issue for real usage (Ukrainian customers type Ukrainian), but worth knowing if testing manually.

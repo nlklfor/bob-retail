@@ -1,11 +1,21 @@
 import Image from "next/image";
-import { getActiveProducts } from "@/lib/products";
-import { ProductCard } from "@/components/product/ProductCard";
+import {
+  getActiveProducts,
+  getCategories,
+  getHomeFeatureImages,
+} from "@/lib/products";
 import { IntroSplash } from "@/components/home/IntroSplash";
 import { ScrollIndicator } from "@/components/home/ScrollIndicator";
+import { NewArrivalsSection } from "@/components/home/NewArrivalsSection";
+import { FeatureImages } from "@/components/home/FeatureImages";
+import { CategoryShowcase } from "@/components/home/CategoryShowcase";
 
 export default async function Home() {
-  const products = await getActiveProducts();
+  const [products, categories, featureImages] = await Promise.all([
+    getActiveProducts(),
+    getCategories(),
+    getHomeFeatureImages(),
+  ]);
 
   return (
     <>
@@ -19,10 +29,11 @@ export default async function Home() {
           breakpoints instead of needing to be re-measured. */}
       <section className="relative h-[calc(100vh-96px)] w-full bg-surface">
         <Image
-          src="/images/bob-bg.png"
+          src="/images/frombobwithlove.png"
           alt=""
           fill
           priority
+          sizes="100vw"
           className="object-cover"
         />
         {/* Legibility gradient so the scroll indicator stays readable
@@ -31,21 +42,13 @@ export default async function Home() {
         <ScrollIndicator targetId="catalog-preview" />
       </section>
 
-      <div id="catalog-preview" className="mx-auto max-w-6xl px-6 py-12">
-        <h1 className="font-display text-3xl uppercase tracking-tight">
-          Новинки
-        </h1>
-
-        {products.length === 0 ? (
-          <p className="mt-8 text-muted">Поки немає товарів.</p>
-        ) : (
-          <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        )}
+      <div id="catalog-preview">
+        <NewArrivalsSection products={products} />
       </div>
+
+      <FeatureImages images={featureImages} />
+
+      <CategoryShowcase categories={categories} />
     </>
   );
 }

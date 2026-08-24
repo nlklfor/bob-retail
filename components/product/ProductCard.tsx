@@ -13,6 +13,7 @@ export function ProductCard({ product }: { product: Product }) {
             src={image}
             alt={product.name}
             fill
+            sizes="(min-width: 1024px) 25vw, (min-width: 640px) 36vw, 65vw"
             className="object-cover transition-opacity group-hover:opacity-80"
           />
         ) : null}

@@ -4,6 +4,14 @@ export type Category = {
   slug: string;
 };
 
+export type HomeFeatureImage = {
+  id: string;
+  position: number;
+  image_url: string | null;
+  label: string | null;
+  product_id: string | null;
+};
+
 export type Product = {
   id: string;
   category_id: string | null;

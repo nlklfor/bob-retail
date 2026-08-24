@@ -54,7 +54,7 @@ export function AddToCartForm({ product }: { product: ProductWithVariants }) {
                   onClick={() => setSelectedVariantId(variant.id)}
                   className={`border px-3 py-2 text-sm ${
                     selectedVariantId === variant.id
-                      ? "border-accent text-accent"
+                      ? "border-highlight text-highlight"
                       : "border-border"
                   } ${outOfStock ? "opacity-30 cursor-not-allowed line-through" : "hover:border-fg"}`}
                 >

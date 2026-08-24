@@ -55,21 +55,21 @@ export function MobileMenu() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
-              className="fixed inset-0 top-24 z-20 bg-bg/60"
+              className="fixed inset-0 top-24 z-20 bg-fg/40"
             />
             <motion.nav
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.15 }}
-              className="fixed inset-x-0 top-24 z-30 flex flex-col border-b border-header-fg/10 bg-header-bg text-sm uppercase tracking-wide text-header-fg"
+              className="fixed inset-x-0 top-24 z-30 flex flex-col border-b border-border bg-bg text-sm uppercase tracking-wide text-fg"
             >
               {LINKS.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
                   onClick={() => setOpen(false)}
-                  className="border-t border-header-fg/10 px-6 py-4 hover:opacity-60"
+                  className="border-t border-border px-6 py-4 hover:text-highlight"
                 >
                   {link.label}
                 </Link>

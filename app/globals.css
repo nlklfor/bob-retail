@@ -1,23 +1,36 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #0a0a0a;
-  --surface: #161616;
-  --border-color: #2b2b2b;
-  --muted: #8a8a8a;
-  --fg: #edebe6;
-  /* Monochrome brand palette — no color accent, just contrast. Pure white
-     (brighter than --fg's off-white) for anything that needs to read as
-     "emphasis": prices, totals, selected states. --danger stays red — that's
-     a semantic/functional color (errors), not a brand accent choice. */
-  --accent: #ffffff;
+  /* Flipped to white/light 2026-08-21 (client decision) — resolves the
+     long-open question in docs/design-direction.md about the site's actual
+     palette in favor of the light reading, not just the header band. */
+  --bg: #ffffff;
+  --surface: #f2f1ee;
+  --border-color: #e2e0da;
+  --muted: #6b6b6b;
+  --fg: #0a0a0a;
+  /* Monochrome brand palette — no color accent, just contrast. Pure black
+     (deeper than --fg's near-black) for anything that needs to read as
+     "emphasis": prices, totals, selected states. --danger stays red —
+     that's a semantic/functional color (errors), not a brand accent
+     choice. */
+  --accent: #000000;
   --danger: #c4453d;
+  /* Third color (client-provided, 2026-08-21) — a restrained accent for
+     interactive/highlight moments only: link hovers, focus rings, selected
+     states (size picker, category filter, payment radio). Deliberately not
+     used for prices/totals — those stay on the monochrome --accent so the
+     "emphasis via contrast" system doesn't get muddled by two competing
+     kinds of emphasis. */
+  --highlight: #9184d9;
 
-  /* Deliberate exception: the header is a white/black contrast band against
-     the dark site, not the dark palette itself — everything else stays on
-     --bg/--fg. */
-  --header-bg: #ffffff;
-  --header-fg: #0a0a0a;
+  /* Deliberate exception: the footer is a black/white band against the
+     white site, not the light palette itself — everything else stays on
+     --bg/--fg. (Previously this exception was the header; now that the
+     site is white, the header just matches the body and no longer needs
+     its own tokens.) */
+  --footer-bg: #0a0a0a;
+  --footer-fg: #ffffff;
 }
 
 @theme inline {
@@ -28,8 +41,9 @@
   --color-fg: var(--fg);
   --color-accent: var(--accent);
   --color-danger: var(--danger);
-  --color-header-bg: var(--header-bg);
-  --color-header-fg: var(--header-fg);
+  --color-highlight: var(--highlight);
+  --color-footer-bg: var(--footer-bg);
+  --color-footer-fg: var(--footer-fg);
 
   --font-display: var(--font-fixel-display);
   --font-sans: var(--font-fixel-text);
@@ -46,4 +60,12 @@ body {
   background: var(--bg);
   color: var(--fg);
   font-family: var(--font-sans);
+}
+
+/* One consistent keyboard-focus indicator, sitewide, using the highlight
+   color — real accessibility value (visible focus on every interactive
+   element) and a natural, non-decorative place to spend the third color. */
+:focus-visible {
+  outline: 2px solid var(--highlight);
+  outline-offset: 2px;
 }

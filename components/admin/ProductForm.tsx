@@ -166,6 +166,20 @@ export function ProductForm({ categories, product, action }: Props) {
 
       <div>
         <label className="text-sm uppercase tracking-wide text-muted">
+          Артикул (SKU)
+        </label>
+        <input
+          name="sku"
+          defaultValue={product?.sku ?? ""}
+          placeholder={
+            product ? "" : "Залиште порожнім — згенерується автоматично"
+          }
+          className="mt-1 w-full border border-border bg-transparent px-3 py-2"
+        />
+      </div>
+
+      <div>
+        <label className="text-sm uppercase tracking-wide text-muted">
           Категорія
         </label>
         <select

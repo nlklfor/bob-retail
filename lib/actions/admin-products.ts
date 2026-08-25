@@ -27,6 +27,7 @@ const productSchema = z.object({
       /^[a-z0-9-]+$/,
       "Слаг може містити лише латинські малі літери, цифри та дефіси",
     ),
+  sku: z.string().trim().max(100).nullable(),
   categoryId: z.string().uuid().nullable(),
   description: z.string().trim().nullable(),
   price: z.number().min(0, "Ціна не може бути від'ємною"),
@@ -49,6 +50,7 @@ function parseFormData(formData: FormData) {
   return productSchema.safeParse({
     name: formData.get("name"),
     slug: formData.get("slug"),
+    sku: (formData.get("sku") as string)?.trim() || null,
     categoryId: formData.get("categoryId") || null,
     description: formData.get("description") || null,
     price: Number(formData.get("price")),

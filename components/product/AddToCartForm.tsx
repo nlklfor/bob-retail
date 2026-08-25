@@ -70,9 +70,10 @@ export function AddToCartForm({ product }: { product: ProductWithVariants }) {
         type="button"
         onClick={handleAddToCart}
         disabled={!selectedVariant || selectedVariant.stock_quantity < 1}
-        className="w-full border border-fg py-3 text-sm uppercase tracking-wide hover:bg-fg hover:text-bg disabled:opacity-30 disabled:cursor-not-allowed"
+        className="flex w-full items-center justify-center gap-2 bg-fg py-3 text-sm uppercase tracking-wide text-bg hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30"
       >
         {added ? "Додано" : "Додати в кошик"}
+        {!added ? <span aria-hidden="true">→</span> : null}
       </button>
     </div>
   );

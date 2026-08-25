@@ -20,7 +20,12 @@ export default async function CatalogPage({
 
   const filtered = products
     .filter((p) => !activeCategory || p.category_id === activeCategory.id)
-    .filter((p) => !query || p.name.toLocaleLowerCase("uk").includes(query));
+    .filter((p) => {
+      if (!query) return true;
+      const nameMatch = p.name.toLocaleLowerCase("uk").includes(query);
+      const skuMatch = p.sku?.toLocaleLowerCase("uk").includes(query) ?? false;
+      return nameMatch || skuMatch;
+    });
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-12">

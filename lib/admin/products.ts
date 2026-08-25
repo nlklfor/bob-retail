@@ -30,6 +30,7 @@ export async function getProductForAdmin(
 export type ProductInput = {
   name: string;
   slug: string;
+  sku: string | null;
   categoryId: string | null;
   description: string | null;
   price: number;
@@ -50,6 +51,7 @@ export async function createProduct(input: ProductInput): Promise<string> {
     .insert({
       name: input.name,
       slug: input.slug,
+      sku: input.sku,
       category_id: input.categoryId,
       description: input.description,
       price: input.price,
@@ -89,6 +91,7 @@ export async function updateProduct(
     .update({
       name: input.name,
       slug: input.slug,
+      sku: input.sku,
       category_id: input.categoryId,
       description: input.description,
       price: input.price,

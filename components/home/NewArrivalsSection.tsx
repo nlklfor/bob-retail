@@ -5,13 +5,15 @@ import type { ProductWithVariants } from "@/lib/types";
 
 export function NewArrivalsSection({
   products,
+  heading = "Новинки",
 }: {
   products: ProductWithVariants[];
+  heading?: string;
 }) {
   return (
     <div className="mx-auto max-w-6xl px-6 py-12">
       <h2 className="text-center font-display text-3xl uppercase tracking-tight">
-        Новинки
+        {heading}
       </h2>
 
       {products.length === 0 ? (

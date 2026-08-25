@@ -58,11 +58,11 @@ export function IntroSplash() {
           // Hardcoded to the video's own background, not bg-bg — this is
           // independent of the site's light theme, same reasoning as the
           // hero's scroll indicator staying hardcoded white.
-          style={{ backgroundColor: "#0C0D14" }}
+          style={{ backgroundColor: "#000000" }}
           className="fixed inset-0 z-[100] flex items-center justify-center"
         >
           <video
-            src="/video/bob-preview.mp4"
+            src="/video/bob_preview.mp4"
             autoPlay
             muted
             playsInline

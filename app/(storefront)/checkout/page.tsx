@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCartStore, useCartSubtotal } from "@/lib/cart-store";
 import { placeOrderAction } from "@/lib/actions/checkout";
+import { CloseIcon } from "@/components/layout/icons";
 import {
   searchCitiesAction,
   searchWarehousesAction,
@@ -25,12 +26,16 @@ const FIELD_CLASS =
 
 export default function CheckoutPage() {
   const items = useCartStore((state) => state.items);
+  const removeItem = useCartStore((state) => state.removeItem);
   const clearCart = useCartStore((state) => state.clear);
   const subtotal = useCartSubtotal();
   const router = useRouter();
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmingVariantId, setConfirmingVariantId] = useState<string | null>(
+    null,
+  );
 
   const [cityQuery, setCityQuery] = useState("");
   const [cityResults, setCityResults] = useState<NovaPoshtaCity[]>([]);
@@ -346,33 +351,88 @@ export default function CheckoutPage() {
         <div>
           <h2 className="text-xl font-semibold">Кошик ({items.length})</h2>
           <div className="mt-4 divide-y divide-border">
-            {items.map((item) => (
-              <div key={item.variantId} className="flex gap-4 py-4">
-                <div className="relative h-24 w-20 flex-none bg-surface">
-                  {item.image ? (
-                    <Image
-                      src={item.image}
-                      alt={item.name}
-                      fill
-                      sizes="80px"
-                      className="object-cover"
-                    />
-                  ) : null}
-                </div>
-                <div className="flex flex-1 flex-col justify-between">
-                  <div className="flex justify-between gap-4">
-                    <p className="text-sm">{item.name}</p>
-                    <p className="flex-none text-sm">
-                      {item.price * item.quantity} грн
-                    </p>
+            {items.map((item) => {
+              const image = item.image ? (
+                <Image
+                  src={item.image}
+                  alt={item.name}
+                  fill
+                  sizes="80px"
+                  className="object-cover"
+                />
+              ) : null;
+              const confirming = confirmingVariantId === item.variantId;
+
+              return (
+                <div key={item.variantId} className="flex gap-4 py-4">
+                  {item.slug ? (
+                    <Link
+                      href={`/products/${item.slug}`}
+                      className="relative h-24 w-20 flex-none bg-surface"
+                    >
+                      {image}
+                    </Link>
+                  ) : (
+                    <div className="relative h-24 w-20 flex-none bg-surface">
+                      {image}
+                    </div>
+                  )}
+                  <div className="flex flex-1 flex-col justify-between">
+                    <div className="flex justify-between gap-4">
+                      {item.slug ? (
+                        <Link
+                          href={`/products/${item.slug}`}
+                          className="text-sm hover:text-highlight"
+                        >
+                          {item.name}
+                        </Link>
+                      ) : (
+                        <p className="text-sm">{item.name}</p>
+                      )}
+                      <p className="flex-none text-sm">
+                        {item.price * item.quantity} грн
+                      </p>
+                    </div>
+                    <div className="text-sm text-muted">
+                      {item.size ? <p>Розмір: {item.size}</p> : null}
+                      <p>Кількість: {item.quantity}</p>
+                    </div>
+
+                    {confirming ? (
+                      <div className="flex items-center gap-3 text-sm">
+                        <span className="text-muted">Видалити товар?</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            removeItem(item.variantId);
+                            setConfirmingVariantId(null);
+                          }}
+                          className="text-danger hover:underline"
+                        >
+                          Так
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setConfirmingVariantId(null)}
+                          className="text-muted hover:underline"
+                        >
+                          Скасувати
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setConfirmingVariantId(item.variantId)}
+                        className="flex w-fit items-center gap-1 text-sm text-muted hover:text-danger"
+                      >
+                        <CloseIcon />
+                        Видалити
+                      </button>
+                    )}
                   </div>
-                  <div className="text-sm text-muted">
-                    {item.size ? <p>Розмір: {item.size}</p> : null}
-                    <p>Кількість: {item.quantity}</p>
-                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="mt-6 space-y-2 border-t border-border pt-4">

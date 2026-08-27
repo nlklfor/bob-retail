@@ -11,9 +11,9 @@ const SOCIAL_LINKS = [
 ];
 
 const INFO_LINKS = [
-  { href: "/payment-terms", label: "Умови оплати" },
-  { href: "/delivery", label: "Доставка" },
-  { href: "/returns", label: "Повернення" },
+  { href: "/faq#payment-terms", label: "Умови оплати" },
+  { href: "/faq#delivery", label: "Доставка" },
+  { href: "/faq#returns", label: "Повернення" },
   { href: "/about", label: "Про нас" },
 ];
 

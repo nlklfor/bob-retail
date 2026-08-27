@@ -195,7 +195,10 @@ export default function CheckoutPage() {
       </h1>
 
       <div className="mt-12 grid gap-16 lg:grid-cols-2">
-        <form onSubmit={handleSubmit} className="space-y-10">
+        <form
+          onSubmit={handleSubmit}
+          className="max-w-xl space-y-10 lg:max-w-none"
+        >
           <section>
             <h2 className="text-xl font-semibold">Контактні дані</h2>
             <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3">

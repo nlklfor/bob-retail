@@ -4,7 +4,7 @@ import type { FeatureImageSlot } from "@/lib/products";
 
 export function FeatureImages({ images }: { images: FeatureImageSlot[] }) {
   return (
-    <section className="flex h-screen w-full border-t border-border">
+    <section className="flex w-full flex-col border-t border-border sm:h-screen sm:flex-row">
       {images.map((slot) => {
         const media = slot.imageUrl ? (
           <Image
@@ -34,7 +34,7 @@ export function FeatureImages({ images }: { images: FeatureImageSlot[] }) {
         return (
           <div
             key={slot.position}
-            className="relative flex-1 border-l border-border bg-surface first:border-l-0"
+            className="relative h-[60vh] border-t border-border bg-surface first:border-t-0 sm:h-full sm:flex-1 sm:border-l sm:border-t-0 sm:first:border-l-0"
           >
             {slot.productSlug ? (
               <Link

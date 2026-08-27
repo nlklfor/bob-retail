@@ -26,6 +26,7 @@ Visual direction is raw and editorial — white/black monochrome (no color accen
 - **Defense-in-depth admin auth.** Every protected layout, page, _and_ Server Action independently re-checks the staff session — not just the outer layout — matching Next.js's own guidance that layout-only checks aren't reliable across client-side navigation.
 - **RLS everywhere.** Row Level Security is enabled on every table. Guests can read the public catalog; `orders`, `order_items`, and `payments` have zero anonymous policies — the only door in is the locked-down `place_order()` function.
 - **Server-only secrets.** Supabase keys never reach the browser (no `NEXT_PUBLIC_*` vars). Both client factories are guarded by the `server-only` package, so importing either into a Client Component fails at build time, not at runtime.
+- **Real backends, not placeholder UI.** The newsletter signup, contact form, and homepage banner editor are each backed by an actual table and Server Action from day one — no fake "coming soon" forms that quietly go nowhere.
 
 ## Tech stack
 
@@ -42,16 +43,20 @@ Visual direction is raw and editorial — white/black monochrome (no color accen
 
 ## Feature status
 
-| Area                                                             | Status                                                    |
-| ---------------------------------------------------------------- | --------------------------------------------------------- |
-| Storefront (catalog, product pages, cart, checkout)              | ✅ Built                                                  |
-| Admin panel (products, variants, image upload, order management) | ✅ Built                                                  |
-| Atomic, stock-safe checkout (`place_order()`)                    | ✅ Built                                                  |
-| Nova Poshta branch search & real shipping cost                   | ✅ Built — live city/branch search + dynamic cost quote   |
-| Test suite (`bun test`)                                          | ✅ Built — Nova Poshta client, pricing, checkout schema   |
-| Monobank payment integration                                     | ⏳ Blocked — waiting on client's business Acquiring token |
-| Fiscal receipts (РРО/ПРРО)                                       | ⏳ Planned — pending client's accountant/provider choice  |
-| Design & motion pass                                             | ⏳ Deferred — functional build first                      |
+| Area                                                                         | Status                                                                                                                 |
+| ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Storefront (homepage, catalog, product pages, cart/checkout)                 | ✅ Built                                                                                                               |
+| Live search by name or SKU (header dropdown + `/catalog?q=`)                 | ✅ Built                                                                                                               |
+| Quick-add to cart from product cards (hover/focus, size + image swap)        | ✅ Built                                                                                                               |
+| Product page (image carousel, SKU, trust/delivery accordion)                 | ✅ Built                                                                                                               |
+| Contact page (real form → `contact_messages`, no placeholder)                | ✅ Built                                                                                                               |
+| Admin panel (products/SKU, variants, image upload, orders, homepage banners) | ✅ Built                                                                                                               |
+| Atomic, stock-safe checkout (`place_order()`)                                | ✅ Built                                                                                                               |
+| Nova Poshta branch search & real shipping cost                               | ✅ Built — live city/branch search + dynamic cost quote                                                                |
+| Test suite (`bun test`)                                                      | ✅ Built — Nova Poshta client, pricing, checkout schema                                                                |
+| Monobank payment integration                                                 | ⏳ Blocked — waiting on client's business Acquiring token                                                              |
+| Fiscal receipts (РРО/ПРРО)                                                   | ⏳ Planned — pending client's accountant/provider choice                                                               |
+| Design & motion pass                                                         | 🎨 Actively in progress — palette, typography, homepage, product & contact pages built; see `docs/design-direction.md` |
 
 Full detail on every item — what's real, what's a placeholder, and exactly what unblocks each one — lives in [`docs/project-status.md`](docs/project-status.md), which is the actual source of truth for this project and is kept current as things change.
 
@@ -94,10 +99,10 @@ bun run dev
 
 ```
 app/
-  (storefront)/     storefront routes — home, catalog, product, checkout (cart + checkout combined), faq, contacts
-  admin/             staff-only routes — login outside the auth group, everything else inside (protected)/
+  (storefront)/     storefront routes — home, catalog, product, checkout (cart + checkout combined), faq, contacts, static info pages
+  admin/             staff-only routes — login outside the auth group, everything else inside (protected)/ (products, orders, home-content)
 lib/
-  actions/           Server Actions (checkout, admin auth, product/order mutations)
+  actions/           Server Actions (checkout, search, contact, newsletter, admin auth, product/order mutations)
   admin/             admin data-access layer + staff-session guard
   supabase/          server-only Supabase client factories (public / admin)
 components/          UI components, split by storefront/admin/product/layout

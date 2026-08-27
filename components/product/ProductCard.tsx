@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCartStore } from "@/lib/cart-store";
+import { useToastStore } from "@/lib/toast-store";
 import { BagIcon } from "@/components/layout/icons";
 import type { ProductWithVariants } from "@/lib/types";
 
@@ -19,6 +20,7 @@ export function ProductCard({ product }: { product: ProductWithVariants }) {
   );
   const [added, setAdded] = useState(false);
   const addItem = useCartStore((state) => state.addItem);
+  const showToast = useToastStore((state) => state.show);
 
   const selectedVariant =
     variants.find((v) => v.id === selectedVariantId) ?? null;
@@ -36,6 +38,7 @@ export function ProductCard({ product }: { product: ProductWithVariants }) {
       image: product.images[0] ?? null,
       size: selectedVariant.size,
     });
+    showToast(`${product.name} додано в кошик`);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   }

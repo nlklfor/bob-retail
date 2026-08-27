@@ -36,6 +36,22 @@ export function BagIcon() {
   );
 }
 
+export function CheckIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      aria-hidden="true"
+    >
+      <polyline points="5 12.5 10 17.5 19 7" />
+    </svg>
+  );
+}
+
 export function CloseIcon() {
   return (
     <svg

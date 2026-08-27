@@ -10,6 +10,7 @@ import {
   Bungee,
 } from "next/font/google";
 import { MotionProvider } from "@/components/MotionProvider";
+import { Toast } from "@/components/layout/Toast";
 import "./globals.css";
 
 // Fixel — self-hosted (not on Google Fonts). Chosen specifically for full
@@ -119,7 +120,10 @@ export default function RootLayout({
       className={`${fixelDisplay.variable} ${fixelText.variable} ${logoFontVariables} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <MotionProvider>{children}</MotionProvider>
+        <MotionProvider>
+          {children}
+          <Toast />
+        </MotionProvider>
       </body>
     </html>
   );

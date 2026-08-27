@@ -2,6 +2,8 @@
 
 import { createAdminClient } from "@/lib/supabase/server";
 import { resolveShippingCost } from "@/lib/nova-poshta/pricing";
+import { getOrderForAdmin } from "@/lib/admin/orders";
+import { sendEmail, BUSINESS_EMAIL } from "@/lib/email";
 import { checkoutSchema, type CheckoutInput } from "./checkout-schema";
 
 export type CheckoutResult =
@@ -67,5 +69,49 @@ export async function placeOrderAction(
       .eq("id", orderId);
   }
 
+  await notifyOrderPlaced(orderId as string, customerEmail || null);
+
   return { success: true, orderId: orderId as string };
+}
+
+async function notifyOrderPlaced(
+  orderId: string,
+  customerEmail: string | null,
+): Promise<void> {
+  const order = await getOrderForAdmin(orderId);
+  if (!order) return;
+
+  const itemLines = order.order_items
+    .map(
+      (item) =>
+        `${item.product_name}${item.size ? ` (${item.size})` : ""} x${item.quantity} — ${item.line_total} грн`,
+    )
+    .join("\n");
+
+  const summary = [
+    `Замовлення №${order.id.slice(0, 8)}`,
+    "",
+    itemLines,
+    "",
+    `Сума: ${order.subtotal} грн`,
+    `Доставка: ${order.shipping_cost} грн`,
+    `Разом: ${order.total} грн`,
+    "",
+    `Отримувач: ${order.customer_name}, ${order.customer_phone}`,
+    `Нова Пошта: ${order.shipping_city}, ${order.shipping_branch}`,
+  ].join("\n");
+
+  await sendEmail({
+    to: BUSINESS_EMAIL,
+    subject: `Нове замовлення №${order.id.slice(0, 8)}`,
+    text: summary,
+  });
+
+  if (customerEmail) {
+    await sendEmail({
+      to: customerEmail,
+      subject: `BOB Retail — замовлення №${order.id.slice(0, 8)} отримано`,
+      text: `Дякуємо за замовлення!\n\n${summary}`,
+    });
+  }
 }

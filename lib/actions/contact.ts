@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { createAdminClient } from "@/lib/supabase/server";
+import { sendEmail, BUSINESS_EMAIL } from "@/lib/email";
 
 const contactSchema = z.object({
   name: z.string().trim().min(1, "Вкажіть ім'я."),
@@ -45,6 +46,22 @@ export async function sendContactMessageAction(
       error: "Не вдалося надіслати повідомлення. Спробуйте пізніше.",
     };
   }
+
+  await sendEmail({
+    to: BUSINESS_EMAIL,
+    subject: `Нове повідомлення від ${parsed.data.name}`,
+    text: [
+      `Ім'я: ${parsed.data.name}`,
+      `Email: ${parsed.data.email}`,
+      parsed.data.socialHandle
+        ? `Telegram/Instagram: ${parsed.data.socialHandle}`
+        : null,
+      "",
+      parsed.data.message,
+    ]
+      .filter((line) => line !== null)
+      .join("\n"),
+  });
 
   return { success: true };
 }

@@ -5,7 +5,7 @@ export default function ContactsPage() {
   return (
     <div>
       <div className="mx-auto max-w-6xl px-6 py-16">
-        <h1 className="font-display text-6xl uppercase tracking-tight sm:text-7xl lg:text-8xl">
+        <h1 className="text-center font-display text-6xl uppercase tracking-tight sm:text-7xl lg:text-8xl">
           Зв&apos;яжіться з нами
         </h1>
 

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import { SearchIcon, CloseIcon } from "./icons";
 import { searchProducts, type SearchResult } from "@/lib/actions/search";
+import { formatPrice } from "@/lib/format";
 
 const DEBOUNCE_MS = 250;
 
@@ -117,7 +118,7 @@ export function SearchToggle() {
                             {product.name}
                           </span>
                           <span className="shrink-0 text-xs text-muted">
-                            {product.price} грн
+                            {formatPrice(product.price)} грн
                           </span>
                         </Link>
                       </li>

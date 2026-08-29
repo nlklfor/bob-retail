@@ -1,8 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { requireStaffSession } from "@/lib/admin/dal";
-import { updateOrderStatus } from "@/lib/admin/orders";
+import { updateOrderStatus, deleteOrder } from "@/lib/admin/orders";
 import type { OrderStatus } from "@/lib/types";
 
 const VALID_STATUSES: OrderStatus[] = [
@@ -28,4 +29,10 @@ export async function updateOrderStatusAction(
   await updateOrderStatus(id, status as OrderStatus);
   revalidatePath(`/admin/orders/${id}`);
   revalidatePath("/admin/orders");
+}
+
+export async function deleteOrderAction(id: string): Promise<void> {
+  await requireStaffSession();
+  await deleteOrder(id);
+  redirect("/admin/orders?orderDeleted=1");
 }

@@ -2,8 +2,18 @@
 
 import { useState } from "react";
 import { updateOrderStatusAction } from "@/lib/actions/admin-orders";
-import { ORDER_STATUS_LABELS } from "@/lib/order-status-labels";
+import {
+  ORDER_STATUS_LABELS,
+  ORDER_STATUS_VARIANT,
+  type StatusVariant,
+} from "@/lib/order-status-labels";
 import type { OrderStatus } from "@/lib/types";
+
+const VARIANT_CLASSES: Record<StatusVariant, string> = {
+  success: "border-success text-success",
+  danger: "border-danger text-danger",
+  pending: "border-pending text-pending",
+};
 
 const STATUSES: OrderStatus[] = [
   "pending_payment",
@@ -38,7 +48,7 @@ export function OrderStatusSelect({
       value={current}
       onChange={handleChange}
       disabled={pending}
-      className="border border-border bg-transparent px-2 py-1 text-sm"
+      className={`border bg-transparent px-2 py-1 text-sm disabled:opacity-50 ${VARIANT_CLASSES[ORDER_STATUS_VARIANT[current]]}`}
     >
       {STATUSES.map((s) => (
         <option key={s} value={s}>

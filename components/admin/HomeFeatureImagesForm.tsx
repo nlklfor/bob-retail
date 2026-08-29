@@ -110,7 +110,7 @@ function Slot({
       </div>
 
       {error ? <p className="mt-2 text-sm text-danger">{error}</p> : null}
-      {saved ? <p className="mt-2 text-sm text-muted">Збережено.</p> : null}
+      {saved ? <p className="mt-2 text-sm text-success">Збережено.</p> : null}
 
       <button
         type="button"

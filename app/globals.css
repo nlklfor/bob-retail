@@ -16,6 +16,11 @@
      choice. */
   --accent: #000000;
   --danger: #c4453d;
+  /* Admin-only status colors (succeed/fail/pending) — same muted,
+     non-neon intensity as --danger, not the storefront's brand palette.
+     Used for order status pills etc. in the admin panel. */
+  --success: #3f8f5f;
+  --pending: #b58900;
   /* Third color (client-provided, 2026-08-21) — a restrained accent for
      interactive/highlight moments only: link hovers, focus rings, selected
      states (size picker, category filter, payment radio). Deliberately not
@@ -41,6 +46,8 @@
   --color-fg: var(--fg);
   --color-accent: var(--accent);
   --color-danger: var(--danger);
+  --color-success: var(--success);
+  --color-pending: var(--pending);
   --color-highlight: var(--highlight);
   --color-footer-bg: var(--footer-bg);
   --color-footer-fg: var(--footer-fg);

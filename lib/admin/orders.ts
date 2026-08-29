@@ -38,3 +38,11 @@ export async function updateOrderStatus(
     .eq("id", id);
   if (error) throw error;
 }
+
+// order_items and payments both reference orders(id) on delete cascade,
+// so deleting the order row alone is enough to clean up both.
+export async function deleteOrder(id: string): Promise<void> {
+  const supabase = createAdminClient();
+  const { error } = await supabase.from("orders").delete().eq("id", id);
+  if (error) throw error;
+}

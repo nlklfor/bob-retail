@@ -9,6 +9,7 @@ import { AddToCartForm } from "@/components/product/AddToCartForm";
 import { Accordion } from "@/components/product/Accordion";
 import { Carousel } from "@/components/home/Carousel";
 import { NewArrivalsSection } from "@/components/home/NewArrivalsSection";
+import { formatPrice } from "@/lib/format";
 
 export default async function ProductPage({
   params,
@@ -69,7 +70,9 @@ export default async function ProductPage({
           {product.sku ? (
             <p className="mt-1 text-sm text-muted">{product.sku}</p>
           ) : null}
-          <p className="text-accent text-lg mt-3">{product.price} грн</p>
+          <p className="text-accent text-lg mt-3">
+            {formatPrice(product.price)} грн
+          </p>
 
           <div className="mt-8">
             <AddToCartForm product={product} />

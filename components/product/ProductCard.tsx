@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useCartStore } from "@/lib/cart-store";
 import { useToastStore } from "@/lib/toast-store";
 import { BagIcon } from "@/components/layout/icons";
+import { formatPrice } from "@/lib/format";
 import type { ProductWithVariants } from "@/lib/types";
 
 export function ProductCard({ product }: { product: ProductWithVariants }) {
@@ -125,7 +126,9 @@ export function ProductCard({ product }: { product: ProductWithVariants }) {
         <h3 className="font-display text-sm uppercase tracking-wide">
           {product.name}
         </h3>
-        <span className="text-accent text-sm">{product.price} грн</span>
+        <span className="text-accent text-sm">
+          {formatPrice(product.price)} грн
+        </span>
       </Link>
     </div>
   );

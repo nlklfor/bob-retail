@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import { requireStaffSession } from "@/lib/admin/dal";
 import { getOrderForAdmin } from "@/lib/admin/orders";
 import { OrderStatusSelect } from "@/components/admin/OrderStatusSelect";
+import { DeleteOrderButton } from "@/components/admin/DeleteOrderButton";
+import { formatPrice } from "@/lib/format";
 
 export default async function AdminOrderDetailPage({
   params,
@@ -22,7 +24,10 @@ export default async function AdminOrderDetailPage({
         <h1 className="font-display text-2xl uppercase tracking-tight">
           Замовлення №{order.id.slice(0, 8)}
         </h1>
-        <OrderStatusSelect orderId={order.id} status={order.status} />
+        <div className="flex items-center gap-4">
+          <OrderStatusSelect orderId={order.id} status={order.status} />
+          <DeleteOrderButton orderId={order.id} />
+        </div>
       </div>
 
       <div className="mt-6 text-sm">
@@ -43,7 +48,7 @@ export default async function AdminOrderDetailPage({
               {item.product_name} {item.size ? `(${item.size})` : ""} ×{" "}
               {item.quantity}
             </span>
-            <span>{item.line_total} грн</span>
+            <span>{formatPrice(item.line_total)} грн</span>
           </div>
         ))}
       </div>
@@ -51,15 +56,15 @@ export default async function AdminOrderDetailPage({
       <div className="mt-4 space-y-1 text-sm">
         <div className="flex justify-between">
           <span className="text-muted">Сума</span>
-          <span>{order.subtotal} грн</span>
+          <span>{formatPrice(order.subtotal)} грн</span>
         </div>
         <div className="flex justify-between">
           <span className="text-muted">Доставка</span>
-          <span>{order.shipping_cost} грн</span>
+          <span>{formatPrice(order.shipping_cost)} грн</span>
         </div>
         <div className="flex justify-between border-t border-border pt-2 mt-2 text-accent">
           <span className="uppercase tracking-wide">Разом</span>
-          <span>{order.total} грн</span>
+          <span>{formatPrice(order.total)} грн</span>
         </div>
       </div>
     </div>

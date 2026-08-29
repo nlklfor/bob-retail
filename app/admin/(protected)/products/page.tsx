@@ -3,6 +3,8 @@ import { requireStaffSession } from "@/lib/admin/dal";
 import { getAllProductsForAdmin } from "@/lib/admin/products";
 import { getCategories } from "@/lib/products";
 import { deleteProductAction } from "@/lib/actions/admin-products";
+import { formatPrice } from "@/lib/format";
+import { AdminFlashToast } from "@/components/admin/AdminFlashToast";
 
 export default async function AdminProductsPage() {
   await requireStaffSession();
@@ -15,6 +17,14 @@ export default async function AdminProductsPage() {
 
   return (
     <div>
+      <AdminFlashToast param="created" message="Товар додано" />
+      <AdminFlashToast param="updated" message="Товар збережено" />
+      <AdminFlashToast param="deleted" message="Товар видалено" />
+      <AdminFlashToast
+        param="deleteError"
+        message="Не вдалося видалити товар"
+      />
+
       <div className="flex items-center justify-between">
         <h1 className="font-display text-2xl uppercase tracking-tight">
           Товари
@@ -42,14 +52,14 @@ export default async function AdminProductsPage() {
                 <p className="uppercase tracking-wide text-sm">
                   {product.name}{" "}
                   {!product.is_active && (
-                    <span className="text-muted">(чернетка)</span>
+                    <span className="text-pending">(чернетка)</span>
                   )}
                 </p>
                 <p className="text-sm text-muted">
                   {product.category_id
                     ? categoryNameById.get(product.category_id)
                     : "—"}{" "}
-                  · {product.price} грн · {totalStock} на складі
+                  · {formatPrice(product.price)} грн · {totalStock} на складі
                 </p>
               </div>
               <div className="flex gap-4 text-sm">

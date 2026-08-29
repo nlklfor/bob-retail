@@ -36,6 +36,30 @@ const productSchema = z.object({
   variants: z.array(variantSchema),
 });
 
+// Postgres unique-violation errors (23505) come through with the
+// constraint name embedded in the message, e.g. `duplicate key value
+// violates unique constraint "products_slug_key"` — used to point the
+// admin at which field actually collided instead of a raw DB error.
+function friendlyProductError(err: unknown): string {
+  if (
+    err &&
+    typeof err === "object" &&
+    "code" in err &&
+    (err as { code?: unknown }).code === "23505"
+  ) {
+    const message =
+      "message" in err ? String((err as { message: unknown }).message) : "";
+    if (message.includes("slug")) {
+      return "Товар із таким слагом вже існує. Вкажіть інший.";
+    }
+    if (message.includes("sku")) {
+      return "Товар із таким артикулом (SKU) вже існує. Вкажіть інший або залиште поле порожнім.";
+    }
+    return "Товар із такими даними вже існує.";
+  }
+  return "Не вдалося зберегти товар. Спробуйте ще раз.";
+}
+
 function parseFormData(formData: FormData) {
   const variants = JSON.parse(String(formData.get("variantsJson") ?? "[]")) as {
     size: string | null;
@@ -72,8 +96,15 @@ export async function createProductAction(
     };
   }
 
-  const id = await createProduct(parsed.data);
-  redirect(`/admin/products/${id}/edit`);
+  try {
+    await createProduct(parsed.data);
+  } catch (err) {
+    return { error: friendlyProductError(err) };
+  }
+  // Back to the list, not the new product's own edit page — closes out
+  // the "add product" flow instead of dropping the admin into another
+  // form to review/edit what they just filled in.
+  redirect("/admin/products?created=1");
 }
 
 export async function updateProductAction(
@@ -89,8 +120,12 @@ export async function updateProductAction(
     };
   }
 
-  await updateProduct(id, parsed.data);
-  redirect("/admin/products");
+  try {
+    await updateProduct(id, parsed.data);
+  } catch (err) {
+    return { error: friendlyProductError(err) };
+  }
+  redirect("/admin/products?updated=1");
 }
 
 export async function uploadProductImageAction(
@@ -119,6 +154,10 @@ export async function uploadProductImageAction(
 
 export async function deleteProductAction(id: string): Promise<void> {
   await requireStaffSession();
-  await deleteProduct(id);
-  redirect("/admin/products");
+  try {
+    await deleteProduct(id);
+  } catch {
+    redirect("/admin/products?deleteError=1");
+  }
+  redirect("/admin/products?deleted=1");
 }

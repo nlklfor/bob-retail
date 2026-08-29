@@ -20,7 +20,10 @@ export function Toast() {
   }, [toast, hide]);
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-6 z-[200] flex justify-center px-4 sm:inset-x-auto sm:right-6 sm:justify-end">
+    // z-[140] — deliberately below the cart sidebar (z-150/151), whose
+    // opaque background then naturally hides the toast behind it rather
+    // than the two overlapping when both are on screen at once.
+    <div className="pointer-events-none fixed inset-x-0 bottom-6 z-[140] flex justify-center px-4 sm:inset-x-auto sm:right-6 sm:justify-end">
       <AnimatePresence>
         {toast ? (
           <motion.div

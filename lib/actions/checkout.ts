@@ -69,7 +69,15 @@ export async function placeOrderAction(
       .eq("id", orderId);
   }
 
-  await notifyOrderPlaced(orderId as string, customerEmail || null);
+  // Never let a notification failure (Resend hiccup, a slow query, whatever)
+  // block the order from being reported as successful — the order is
+  // already committed at this point, and email is a side effect, not a
+  // condition of checkout succeeding.
+  try {
+    await notifyOrderPlaced(orderId as string, customerEmail || null);
+  } catch (err) {
+    console.error("Failed to send order notification emails:", err);
+  }
 
   return { success: true, orderId: orderId as string };
 }

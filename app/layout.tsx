@@ -11,6 +11,7 @@ import {
 } from "next/font/google";
 import { MotionProvider } from "@/components/MotionProvider";
 import { Toast } from "@/components/layout/Toast";
+import { CartSidebar } from "@/components/cart/CartSidebar";
 import "./globals.css";
 
 // Fixel — self-hosted (not on Google Fonts). Chosen specifically for full
@@ -123,6 +124,7 @@ export default function RootLayout({
         <MotionProvider>
           {children}
           <Toast />
+          <CartSidebar />
         </MotionProvider>
       </body>
     </html>

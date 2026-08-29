@@ -2,8 +2,7 @@ import Link from "next/link";
 import { VideoLogo } from "./VideoLogo";
 import { SearchToggle } from "./SearchToggle";
 import { MobileMenu } from "./MobileMenu";
-import { CartBadge } from "./CartBadge";
-import { BagIcon } from "./icons";
+import { CartButton } from "./CartButton";
 
 // Fixed height (not content-driven) so it stays identical across
 // breakpoints — the homepage hero syncs its own height to this exact value
@@ -20,14 +19,7 @@ function IconCluster() {
   return (
     <div className="flex items-center justify-end gap-3 sm:gap-5">
       <SearchToggle />
-      <Link
-        href="/checkout"
-        aria-label="Кошик"
-        className="relative flex h-9 w-9 items-center justify-center hover:text-highlight"
-      >
-        <BagIcon />
-        <CartBadge />
-      </Link>
+      <CartButton />
     </div>
   );
 }

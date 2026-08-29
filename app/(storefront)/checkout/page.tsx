@@ -1,12 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useCartStore, useCartSubtotal } from "@/lib/cart-store";
 import { placeOrderAction } from "@/lib/actions/checkout";
-import { CloseIcon } from "@/components/layout/icons";
+import { CartItemRow } from "@/components/cart/CartItemRow";
+import { EmptyCartState } from "@/components/cart/EmptyCartState";
+import { formatPrice } from "@/lib/format";
 import {
   searchCitiesAction,
   searchWarehousesAction,
@@ -29,7 +28,6 @@ export default function CheckoutPage() {
   const removeItem = useCartStore((state) => state.removeItem);
   const clearCart = useCartStore((state) => state.clear);
   const subtotal = useCartSubtotal();
-  const router = useRouter();
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,9 +51,6 @@ export default function CheckoutPage() {
 
   const [showOtherPaymentOptions, setShowOtherPaymentOptions] = useState(false);
 
-  // City search, debounced. Results are only fetched (not reset) here —
-  // whether they're shown is a derived value below, so the effect never
-  // needs to setState synchronously on its early-return paths.
   const cityQueryIsSettled = selectedCity && cityQuery === selectedCity.name;
   useEffect(() => {
     if (cityQueryIsSettled || cityQuery.trim().length < 2) return;
@@ -86,11 +81,6 @@ export default function CheckoutPage() {
     ? []
     : warehouseResults;
 
-  // Live shipping cost preview once a city is picked. "Loading" is derived
-  // by comparing the key of the currently-selected city+cart against the key
-  // the last resolved quote was for, rather than tracked as its own piece of
-  // state — the resolvedQuoteKey update only ever happens inside the async
-  // .then callback, never synchronously in the effect body.
   const currentQuoteKey = selectedCity
     ? `${selectedCity.ref}|${items.map((i) => `${i.variantId}:${i.quantity}`).join(",")}`
     : null;
@@ -147,40 +137,51 @@ export default function CheckoutPage() {
     const firstName = String(formData.get("firstName") ?? "").trim();
     const lastName = String(formData.get("lastName") ?? "").trim();
 
-    const result = await placeOrderAction({
-      customerName: `${firstName} ${lastName}`.trim(),
-      customerPhone: String(formData.get("customerPhone") ?? ""),
-      customerEmail: String(formData.get("customerEmail") ?? ""),
-      shippingCity: selectedCity.name,
-      shippingCityRef: selectedCity.ref,
-      shippingBranch: selectedWarehouse.description,
-      shippingWarehouseRef: selectedWarehouse.ref,
-      items: items.map((item) => ({
-        variantId: item.variantId,
-        quantity: item.quantity,
-      })),
-    });
+    try {
+      const result = await placeOrderAction({
+        customerName: `${firstName} ${lastName}`.trim(),
+        customerPhone: String(formData.get("customerPhone") ?? ""),
+        customerEmail: String(formData.get("customerEmail") ?? ""),
+        shippingCity: selectedCity.name,
+        shippingCityRef: selectedCity.ref,
+        shippingBranch: selectedWarehouse.description,
+        shippingWarehouseRef: selectedWarehouse.ref,
+        items: items.map((item) => ({
+          variantId: item.variantId,
+          quantity: item.quantity,
+        })),
+      });
 
-    if (!result.success) {
-      setError(result.error);
+      if (!result.success) {
+        setError(result.error);
+        setSubmitting(false);
+        return;
+      }
+
+      clearCart();
+      // A hard navigation, not router.push() — confirmed via direct testing
+      // that router.push() here reliably reports success (correct URL, no
+      // thrown error) without the client-side router actually navigating,
+      // leaving the user stuck on /checkout despite the order having gone
+      // through. A full navigation sidesteps whatever that is entirely.
+      window.location.href = `/order/${result.orderId}`;
+    } catch {
+      // Defense in depth: placeOrderAction itself shouldn't throw (it
+      // catches its own non-critical failures), but if it ever does for an
+      // unrelated reason, show a real error instead of leaving the button
+      // stuck on "Оформлення..." with no feedback.
+      setError("Не вдалося оформити замовлення. Спробуйте ще раз.");
       setSubmitting(false);
-      return;
     }
-
-    clearCart();
-    router.push(`/order/${result.orderId}`);
   }
 
   if (items.length === 0) {
     return (
       <div className="mx-auto max-w-6xl px-6 py-12">
-        <h1 className="font-display text-5xl uppercase tracking-tight sm:text-6xl">
+        <h1 className="text-center font-display text-5xl uppercase tracking-tight sm:text-6xl">
           Кошик
         </h1>
-        <p className="mt-8 text-muted">Ваш кошик порожній.</p>
-        <Link href="/catalog" className="mt-4 inline-block text-highlight">
-          Продовжити покупки
-        </Link>
+        <EmptyCartState />
       </div>
     );
   }
@@ -354,94 +355,25 @@ export default function CheckoutPage() {
         <div>
           <h2 className="text-xl font-semibold">Кошик ({items.length})</h2>
           <div className="mt-4 divide-y divide-border">
-            {items.map((item) => {
-              const image = item.image ? (
-                <Image
-                  src={item.image}
-                  alt={item.name}
-                  fill
-                  sizes="80px"
-                  className="object-cover"
-                />
-              ) : null;
-              const confirming = confirmingVariantId === item.variantId;
-
-              return (
-                <div key={item.variantId} className="flex gap-4 py-4">
-                  {item.slug ? (
-                    <Link
-                      href={`/products/${item.slug}`}
-                      className="relative h-24 w-20 flex-none bg-surface"
-                    >
-                      {image}
-                    </Link>
-                  ) : (
-                    <div className="relative h-24 w-20 flex-none bg-surface">
-                      {image}
-                    </div>
-                  )}
-                  <div className="flex flex-1 flex-col justify-between">
-                    <div className="flex justify-between gap-4">
-                      {item.slug ? (
-                        <Link
-                          href={`/products/${item.slug}`}
-                          className="text-sm hover:text-highlight"
-                        >
-                          {item.name}
-                        </Link>
-                      ) : (
-                        <p className="text-sm">{item.name}</p>
-                      )}
-                      <p className="flex-none text-sm">
-                        {item.price * item.quantity} грн
-                      </p>
-                    </div>
-                    <div className="text-sm text-muted">
-                      {item.size ? <p>Розмір: {item.size}</p> : null}
-                      <p>Кількість: {item.quantity}</p>
-                    </div>
-
-                    {confirming ? (
-                      <div className="flex items-center gap-3 text-sm">
-                        <span className="text-muted">Видалити товар?</span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            removeItem(item.variantId);
-                            setConfirmingVariantId(null);
-                          }}
-                          className="text-danger hover:underline"
-                        >
-                          Так
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setConfirmingVariantId(null)}
-                          className="text-muted hover:underline"
-                        >
-                          Скасувати
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => setConfirmingVariantId(item.variantId)}
-                        className="flex w-fit items-center gap-1 text-sm text-muted hover:text-danger"
-                      >
-                        <CloseIcon />
-                        Видалити
-                      </button>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+            {items.map((item) => (
+              <CartItemRow
+                key={item.variantId}
+                item={item}
+                confirming={confirmingVariantId === item.variantId}
+                onRequestDelete={() => setConfirmingVariantId(item.variantId)}
+                onConfirmDelete={() => {
+                  removeItem(item.variantId);
+                  setConfirmingVariantId(null);
+                }}
+                onCancelDelete={() => setConfirmingVariantId(null)}
+              />
+            ))}
           </div>
 
           <div className="mt-6 space-y-2 border-t border-border pt-4">
             <div className="flex justify-between text-sm">
               <span className="text-muted">Сума</span>
-              <span>{subtotal} грн</span>
+              <span>{formatPrice(subtotal)} грн</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted">Доставка</span>
@@ -451,13 +383,13 @@ export default function CheckoutPage() {
                   : visibleShippingCostLoading
                     ? "Розрахунок..."
                     : visibleShippingCost !== null
-                      ? `${visibleShippingCost} грн`
+                      ? `${formatPrice(visibleShippingCost)} грн`
                       : "—"}
               </span>
             </div>
             <div className="flex justify-between border-t border-border pt-3 text-lg font-semibold">
               <span>Разом</span>
-              <span>{total} грн</span>
+              <span>{formatPrice(total)} грн</span>
             </div>
           </div>
         </div>

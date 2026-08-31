@@ -203,25 +203,41 @@ export default function CheckoutPage() {
           <section>
             <h2 className="text-xl font-semibold">Контактні дані</h2>
             <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3">
+              <label htmlFor="checkout-firstName" className="sr-only">
+                Ім&apos;я
+              </label>
               <input
+                id="checkout-firstName"
                 name="firstName"
                 placeholder="Ім'я"
                 required
                 className={FIELD_CLASS}
               />
+              <label htmlFor="checkout-lastName" className="sr-only">
+                Прізвище
+              </label>
               <input
+                id="checkout-lastName"
                 name="lastName"
                 placeholder="Прізвище"
                 required
                 className={FIELD_CLASS}
               />
+              <label htmlFor="checkout-phone" className="sr-only">
+                Телефон
+              </label>
               <input
+                id="checkout-phone"
                 name="customerPhone"
                 placeholder="Телефон"
                 required
                 className={FIELD_CLASS}
               />
+              <label htmlFor="checkout-email" className="sr-only">
+                Email (необов&apos;язково)
+              </label>
               <input
+                id="checkout-email"
                 name="customerEmail"
                 type="email"
                 placeholder="Email (необов'язково)"
@@ -234,7 +250,11 @@ export default function CheckoutPage() {
             <h2 className="text-xl font-semibold">Доставка Новою Поштою</h2>
             <div className="mt-4 space-y-3">
               <div className="relative">
+                <label htmlFor="checkout-city" className="sr-only">
+                  Місто
+                </label>
                 <input
+                  id="checkout-city"
                   value={cityQuery}
                   onChange={(e) => {
                     setCityQuery(e.target.value);
@@ -268,7 +288,11 @@ export default function CheckoutPage() {
               </div>
 
               <div className="relative">
+                <label htmlFor="checkout-warehouse" className="sr-only">
+                  Відділення
+                </label>
                 <input
+                  id="checkout-warehouse"
                   value={warehouseQuery}
                   onChange={(e) => {
                     setWarehouseQuery(e.target.value);

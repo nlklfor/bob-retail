@@ -47,11 +47,16 @@ function CategoryRow({ category }: { category: Category }) {
     setSaving(false);
   }
 
+  const fileInputId = `category-image-${category.id}`;
+
   return (
     <div className="border border-border p-4">
-      <p className="text-sm uppercase tracking-wide text-muted">
+      <label
+        htmlFor={fileInputId}
+        className="text-sm uppercase tracking-wide text-muted"
+      >
         {category.name}
-      </p>
+      </label>
 
       <div className="relative mt-3 aspect-[4/5] w-full bg-surface">
         {imageUrl ? (
@@ -59,6 +64,7 @@ function CategoryRow({ category }: { category: Category }) {
         ) : null}
       </div>
       <input
+        id={fileInputId}
         type="file"
         accept="image/png,image/jpeg,image/webp,image/gif"
         disabled={uploading}

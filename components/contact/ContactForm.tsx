@@ -40,17 +40,29 @@ export function ContactForm() {
   return (
     <form onSubmit={handleSubmit} className="max-w-md space-y-5">
       <div>
-        <label className="text-sm uppercase tracking-wide text-muted">
+        <label
+          htmlFor="contact-name"
+          className="text-sm uppercase tracking-wide text-muted"
+        >
           Ім&apos;я
         </label>
-        <input name="name" required className={`mt-1 ${FIELD_CLASS}`} />
+        <input
+          id="contact-name"
+          name="name"
+          required
+          className={`mt-1 ${FIELD_CLASS}`}
+        />
       </div>
 
       <div>
-        <label className="text-sm uppercase tracking-wide text-muted">
+        <label
+          htmlFor="contact-email"
+          className="text-sm uppercase tracking-wide text-muted"
+        >
           Email
         </label>
         <input
+          id="contact-email"
           name="email"
           type="email"
           required
@@ -59,17 +71,28 @@ export function ContactForm() {
       </div>
 
       <div>
-        <label className="text-sm uppercase tracking-wide text-muted">
+        <label
+          htmlFor="contact-social"
+          className="text-sm uppercase tracking-wide text-muted"
+        >
           Telegram або Instagram (необов&apos;язково)
         </label>
-        <input name="socialHandle" className={`mt-1 ${FIELD_CLASS}`} />
+        <input
+          id="contact-social"
+          name="socialHandle"
+          className={`mt-1 ${FIELD_CLASS}`}
+        />
       </div>
 
       <div>
-        <label className="text-sm uppercase tracking-wide text-muted">
+        <label
+          htmlFor="contact-message"
+          className="text-sm uppercase tracking-wide text-muted"
+        >
           Повідомлення
         </label>
         <textarea
+          id="contact-message"
           name="message"
           required
           rows={4}

@@ -74,7 +74,11 @@ export function SearchToggle() {
             className="absolute right-0 top-full z-50 mt-2 w-80 border border-border bg-bg p-3 shadow-lg"
           >
             <form action="/catalog" method="get">
+              <label htmlFor="site-search" className="sr-only">
+                Пошук за назвою
+              </label>
               <input
+                id="site-search"
                 type="search"
                 name="q"
                 value={query}

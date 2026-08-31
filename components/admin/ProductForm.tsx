@@ -138,10 +138,14 @@ export function ProductForm({ categories, product, action }: Props) {
   return (
     <form onSubmit={handleSubmit} className="max-w-2xl space-y-6">
       <div>
-        <label className="text-sm uppercase tracking-wide text-muted">
+        <label
+          htmlFor="product-name"
+          className="text-sm uppercase tracking-wide text-muted"
+        >
           Назва
         </label>
         <input
+          id="product-name"
           name="name"
           value={name}
           onChange={(e) => handleNameChange(e.target.value)}
@@ -151,10 +155,14 @@ export function ProductForm({ categories, product, action }: Props) {
       </div>
 
       <div>
-        <label className="text-sm uppercase tracking-wide text-muted">
+        <label
+          htmlFor="product-slug"
+          className="text-sm uppercase tracking-wide text-muted"
+        >
           Слаг (URL)
         </label>
         <input
+          id="product-slug"
           name="slug"
           value={slug}
           onChange={(e) => handleSlugChange(e.target.value)}
@@ -165,10 +173,14 @@ export function ProductForm({ categories, product, action }: Props) {
       </div>
 
       <div>
-        <label className="text-sm uppercase tracking-wide text-muted">
+        <label
+          htmlFor="product-sku"
+          className="text-sm uppercase tracking-wide text-muted"
+        >
           Артикул (SKU)
         </label>
         <input
+          id="product-sku"
           name="sku"
           defaultValue={product?.sku ?? ""}
           placeholder={
@@ -179,10 +191,14 @@ export function ProductForm({ categories, product, action }: Props) {
       </div>
 
       <div>
-        <label className="text-sm uppercase tracking-wide text-muted">
+        <label
+          htmlFor="product-category"
+          className="text-sm uppercase tracking-wide text-muted"
+        >
           Категорія
         </label>
         <select
+          id="product-category"
           name="categoryId"
           defaultValue={product?.category_id ?? ""}
           className="mt-1 w-full border border-border bg-transparent px-3 py-2"
@@ -197,10 +213,14 @@ export function ProductForm({ categories, product, action }: Props) {
       </div>
 
       <div>
-        <label className="text-sm uppercase tracking-wide text-muted">
+        <label
+          htmlFor="product-description"
+          className="text-sm uppercase tracking-wide text-muted"
+        >
           Опис
         </label>
         <textarea
+          id="product-description"
           name="description"
           defaultValue={product?.description ?? ""}
           rows={4}
@@ -209,10 +229,14 @@ export function ProductForm({ categories, product, action }: Props) {
       </div>
 
       <div>
-        <label className="text-sm uppercase tracking-wide text-muted">
+        <label
+          htmlFor="product-price"
+          className="text-sm uppercase tracking-wide text-muted"
+        >
           Ціна (грн)
         </label>
         <input
+          id="product-price"
           name="price"
           type="number"
           step="0.01"
@@ -224,7 +248,10 @@ export function ProductForm({ categories, product, action }: Props) {
       </div>
 
       <div>
-        <label className="text-sm uppercase tracking-wide text-muted">
+        <label
+          htmlFor="product-images"
+          className="text-sm uppercase tracking-wide text-muted"
+        >
           Зображення
         </label>
         <div className="mt-2 flex flex-wrap gap-3">
@@ -242,6 +269,7 @@ export function ProductForm({ categories, product, action }: Props) {
           ))}
         </div>
         <input
+          id="product-images"
           type="file"
           accept="image/png,image/jpeg,image/webp,image/gif"
           multiple

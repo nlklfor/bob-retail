@@ -58,11 +58,18 @@ function Slot({
     setSaving(false);
   }
 
+  const fileInputId = `feature-image-${slot.id}`;
+  const labelInputId = `feature-label-${slot.id}`;
+  const productSelectId = `feature-product-${slot.id}`;
+
   return (
     <div className="border border-border p-4">
-      <p className="text-sm uppercase tracking-wide text-muted">
+      <label
+        htmlFor={fileInputId}
+        className="text-sm uppercase tracking-wide text-muted"
+      >
         Банер {slot.position}
-      </p>
+      </label>
 
       <div className="relative mt-3 h-40 w-full bg-surface">
         {imageUrl ? (
@@ -70,6 +77,7 @@ function Slot({
         ) : null}
       </div>
       <input
+        id={fileInputId}
         type="file"
         accept="image/png,image/jpeg,image/webp,image/gif"
         disabled={uploading}
@@ -81,10 +89,14 @@ function Slot({
       ) : null}
 
       <div className="mt-3">
-        <label className="text-sm uppercase tracking-wide text-muted">
+        <label
+          htmlFor={labelInputId}
+          className="text-sm uppercase tracking-wide text-muted"
+        >
           Підпис
         </label>
         <input
+          id={labelInputId}
           value={label}
           onChange={(e) => setLabel(e.target.value)}
           className="mt-1 w-full border border-border bg-transparent px-3 py-2"
@@ -92,10 +104,14 @@ function Slot({
       </div>
 
       <div className="mt-3">
-        <label className="text-sm uppercase tracking-wide text-muted">
+        <label
+          htmlFor={productSelectId}
+          className="text-sm uppercase tracking-wide text-muted"
+        >
           Товар (посилання)
         </label>
         <select
+          id={productSelectId}
           value={productId}
           onChange={(e) => setProductId(e.target.value)}
           className="mt-1 w-full border border-border bg-transparent px-3 py-2"

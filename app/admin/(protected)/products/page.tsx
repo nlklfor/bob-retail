@@ -5,15 +5,30 @@ import { getCategories } from "@/lib/products";
 import { deleteProductAction } from "@/lib/actions/admin-products";
 import { formatPrice } from "@/lib/format";
 import { AdminFlashToast } from "@/components/admin/AdminFlashToast";
+import { Pagination } from "@/components/ui/Pagination";
 
-export default async function AdminProductsPage() {
+const PAGE_SIZE = 20;
+
+export default async function AdminProductsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
   await requireStaffSession();
+  const { page } = await searchParams;
 
   const [products, categories] = await Promise.all([
     getAllProductsForAdmin(),
     getCategories(),
   ]);
   const categoryNameById = new Map(categories.map((c) => [c.id, c.name]));
+
+  const totalPages = Math.max(1, Math.ceil(products.length / PAGE_SIZE));
+  const currentPage = Math.min(Math.max(1, Number(page) || 1), totalPages);
+  const pagedProducts = products.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
 
   return (
     <div>
@@ -38,7 +53,7 @@ export default async function AdminProductsPage() {
       </div>
 
       <div className="mt-6 divide-y divide-border">
-        {products.map((product) => {
+        {pagedProducts.map((product) => {
           const totalStock = product.product_variants.reduce(
             (sum, v) => sum + v.stock_quantity,
             0,
@@ -85,6 +100,12 @@ export default async function AdminProductsPage() {
           <p className="py-4 text-muted">Поки немає товарів.</p>
         )}
       </div>
+
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        buildHref={(p) => `/admin/products${p > 1 ? `?page=${p}` : ""}`}
+      />
     </div>
   );
 }

@@ -1,5 +1,11 @@
 import Image from "next/image";
+import type { Metadata } from "next";
 import { ContactForm } from "@/components/contact/ContactForm";
+
+export const metadata: Metadata = {
+  title: "Контакти",
+  description: "Зв'яжіться з BOB Retail.",
+};
 
 export default function ContactsPage() {
   return (

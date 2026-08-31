@@ -1,10 +1,19 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import "server-only";
+import type { Metadata } from "next";
 import { createAdminClient } from "@/lib/supabase/server";
 import type { OrderWithItems } from "@/lib/types";
 import { OrderConfirmationHeader } from "@/components/order/OrderConfirmationHeader";
 import { formatPrice } from "@/lib/format";
+
+// Per-order confirmation page — nothing here should turn up in search
+// results, so it's excluded from indexing rather than given a real
+// description.
+export const metadata: Metadata = {
+  title: "Замовлення оформлено",
+  robots: { index: false, follow: false },
+};
 
 async function getOrder(id: string): Promise<OrderWithItems | null> {
   const supabase = createAdminClient();

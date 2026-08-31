@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import { FaqSection } from "@/components/faq/FaqSection";
+
+export const metadata: Metadata = {
+  title: "Питання",
+  description: "Відповіді на часті питання про доставку, оплату та повернення.",
+};
 
 const SECTIONS = [
   {

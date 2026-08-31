@@ -9,10 +9,25 @@ import { formatPrice } from "@/lib/format";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { DeleteOrderButton } from "@/components/admin/DeleteOrderButton";
 import { AdminFlashToast } from "@/components/admin/AdminFlashToast";
+import { Pagination } from "@/components/ui/Pagination";
 
-export default async function AdminOrdersPage() {
+const PAGE_SIZE = 20;
+
+export default async function AdminOrdersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
   await requireStaffSession();
+  const { page } = await searchParams;
   const orders = await getAllOrdersForAdmin();
+
+  const totalPages = Math.max(1, Math.ceil(orders.length / PAGE_SIZE));
+  const currentPage = Math.min(Math.max(1, Number(page) || 1), totalPages);
+  const pagedOrders = orders.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
 
   return (
     <div>
@@ -23,7 +38,7 @@ export default async function AdminOrdersPage() {
       </h1>
 
       <div className="mt-6 divide-y divide-border">
-        {orders.map((order) => (
+        {pagedOrders.map((order) => (
           <div
             key={order.id}
             className="flex items-center justify-between gap-4 py-4"
@@ -52,6 +67,12 @@ export default async function AdminOrdersPage() {
           <p className="py-4 text-muted">Поки немає замовлень.</p>
         )}
       </div>
+
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        buildHref={(p) => `/admin/orders${p > 1 ? `?page=${p}` : ""}`}
+      />
     </div>
   );
 }

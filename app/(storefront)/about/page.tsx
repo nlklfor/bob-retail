@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import { ModelViewer } from "@/components/about/ModelViewer";
+
+export const metadata: Metadata = {
+  title: "Про нас",
+  description: "Історія та цінності BOB Retail.",
+};
 
 export default function AboutPage() {
   return (

@@ -1,14 +1,53 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { getActiveProducts, getCategories } from "@/lib/products";
 import { ProductCard } from "@/components/product/ProductCard";
 import { SortSelect } from "@/components/catalog/SortSelect";
+import { Pagination } from "@/components/ui/Pagination";
+
+const PAGE_SIZE = 12;
+
+type CatalogSearchParams = Promise<{
+  category?: string;
+  q?: string;
+  sort?: string;
+  page?: string;
+}>;
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: CatalogSearchParams;
+}): Promise<Metadata> {
+  const { category, q } = await searchParams;
+
+  if (q?.trim()) {
+    return { title: `Пошук «${q.trim()}»` };
+  }
+
+  if (category) {
+    const categories = await getCategories();
+    const match = categories.find((c) => c.slug === category);
+    if (match) {
+      return {
+        title: match.name,
+        description: `${match.name} — каталог BOB Retail.`,
+      };
+    }
+  }
+
+  return {
+    title: "Каталог",
+    description: "Каталог товарів BOB Retail.",
+  };
+}
 
 export default async function CatalogPage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string; q?: string; sort?: string }>;
+  searchParams: CatalogSearchParams;
 }) {
-  const { category, q, sort } = await searchParams;
+  const { category, q, sort, page } = await searchParams;
   const [products, categories] = await Promise.all([
     getActiveProducts(),
     getCategories(),
@@ -37,6 +76,24 @@ export default async function CatalogPage({
     sorted.sort((a, b) => b.price - a.price);
   } else if (sort === "name") {
     sorted.sort((a, b) => a.name.localeCompare(b.name, "uk"));
+  }
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
+  const requestedPage = Number(page) || 1;
+  const currentPage = Math.min(Math.max(1, requestedPage), totalPages);
+  const paged = sorted.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
+
+  function buildHref(targetPage: number) {
+    const params = new URLSearchParams();
+    if (category) params.set("category", category);
+    if (q) params.set("q", q);
+    if (sort) params.set("sort", sort);
+    if (targetPage > 1) params.set("page", String(targetPage));
+    const query = params.toString();
+    return `/catalog${query ? `?${query}` : ""}`;
   }
 
   return (
@@ -86,11 +143,18 @@ export default async function CatalogPage({
             : "У цій категорії поки немає товарів."}
         </p>
       ) : (
-        <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
-          {sorted.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        <>
+          <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
+            {paged.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            buildHref={buildHref}
+          />
+        </>
       )}
     </div>
   );

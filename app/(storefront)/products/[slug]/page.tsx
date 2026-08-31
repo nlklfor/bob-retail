@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
+import type { Metadata } from "next";
 import {
   getActiveProducts,
   getCategories,
@@ -10,6 +11,33 @@ import { Accordion } from "@/components/product/Accordion";
 import { Carousel } from "@/components/home/Carousel";
 import { NewArrivalsSection } from "@/components/home/NewArrivalsSection";
 import { formatPrice } from "@/lib/format";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const product = await getProductBySlug(slug);
+
+  if (!product) {
+    return { title: "Товар не знайдено" };
+  }
+
+  const description =
+    product.description?.trim() ||
+    `${product.name} — оригінальний товар BOB Retail.`;
+
+  return {
+    title: product.name,
+    description,
+    openGraph: {
+      title: product.name,
+      description,
+      images: product.images.length > 0 ? product.images : undefined,
+    },
+  };
+}
 
 export default async function ProductPage({
   params,

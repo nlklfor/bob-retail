@@ -26,7 +26,6 @@ const FIELD_CLASS =
 export default function CheckoutPage() {
   const items = useCartStore((state) => state.items);
   const removeItem = useCartStore((state) => state.removeItem);
-  const clearCart = useCartStore((state) => state.clear);
   const subtotal = useCartSubtotal();
 
   const [submitting, setSubmitting] = useState(false);
@@ -158,12 +157,17 @@ export default function CheckoutPage() {
         return;
       }
 
-      clearCart();
       // A hard navigation, not router.push() — confirmed via direct testing
       // that router.push() here reliably reports success (correct URL, no
       // thrown error) without the client-side router actually navigating,
       // leaving the user stuck on /checkout despite the order having gone
       // through. A full navigation sidesteps whatever that is entirely.
+      //
+      // The cart is cleared on the confirmation page itself (see
+      // ClearCartOnMount), not here — clearing it before this navigation
+      // fires made this page re-render with its empty-cart state for the
+      // brief moment before the browser actually left, which showed up as
+      // a flash of "Кошик порожній" during checkout.
       window.location.href = `/order/${result.orderId}`;
     } catch {
       // Defense in depth: placeOrderAction itself shouldn't throw (it

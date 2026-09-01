@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { createAdminClient } from "@/lib/supabase/server";
 import type { OrderWithItems } from "@/lib/types";
 import { OrderConfirmationHeader } from "@/components/order/OrderConfirmationHeader";
+import { ClearCartOnMount } from "@/components/order/ClearCartOnMount";
 import { formatPrice } from "@/lib/format";
 
 // Per-order confirmation page — nothing here should turn up in search
@@ -41,6 +42,7 @@ export default async function OrderConfirmationPage({
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-16">
+      <ClearCartOnMount />
       <OrderConfirmationHeader
         orderNumber={order.id.slice(0, 8).toUpperCase()}
         customerEmail={order.customer_email}

@@ -6,13 +6,16 @@ import { createAdminClient } from "@/lib/supabase/server";
 import type { OrderWithItems } from "@/lib/types";
 import { OrderConfirmationHeader } from "@/components/order/OrderConfirmationHeader";
 import { ClearCartOnMount } from "@/components/order/ClearCartOnMount";
+import { PendingPaymentAutoRefresh } from "@/components/order/PendingPaymentAutoRefresh";
 import { formatPrice } from "@/lib/format";
+import { getInvoiceStatus } from "@/lib/monobank/client";
+import { applyInvoiceStatus } from "@/lib/monobank/apply-status";
 
 // Per-order confirmation page — nothing here should turn up in search
 // results, so it's excluded from indexing rather than given a real
 // description.
 export const metadata: Metadata = {
-  title: "Замовлення оформлено",
+  title: "Замовлення",
   robots: { index: false, follow: false },
 };
 
@@ -28,21 +31,94 @@ async function getOrder(id: string): Promise<OrderWithItems | null> {
   return data as unknown as OrderWithItems;
 }
 
+async function getInvoiceIdForOrder(orderId: string): Promise<string | null> {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("payments")
+    .select("external_reference")
+    .eq("order_id", orderId)
+    .maybeSingle();
+
+  return data?.external_reference ?? null;
+}
+
 export default async function OrderConfirmationPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const order = await getOrder(id);
+  let order = await getOrder(id);
 
   if (!order) {
     notFound();
   }
 
+  // The webhook is the real-time path, but it can simply not have arrived
+  // yet by the time Monobank redirects the customer's browser back here —
+  // check directly rather than leaving them staring at "processing" for no
+  // reason. Safe to call on every load: applyInvoiceStatus() only acts on
+  // an order still sitting in pending_payment.
+  if (order.status === "pending_payment") {
+    const invoiceId = await getInvoiceIdForOrder(order.id);
+    if (invoiceId) {
+      try {
+        const invoiceStatus = await getInvoiceStatus(invoiceId);
+        await applyInvoiceStatus(order.id, invoiceId, invoiceStatus.status);
+        order = (await getOrder(id)) ?? order;
+      } catch (err) {
+        console.error("Failed to reconcile Monobank invoice status:", err);
+      }
+    }
+  }
+
+  if (order.status === "pending_payment") {
+    return (
+      <div className="mx-auto max-w-2xl px-6 py-16 text-center">
+        <PendingPaymentAutoRefresh />
+        <h1 className="font-display text-2xl uppercase tracking-tight">
+          Очікуємо підтвердження оплати
+        </h1>
+        <p className="mt-2 text-muted">
+          Замовлення №{order.id.slice(0, 8).toUpperCase()}
+        </p>
+        <p className="mt-6 text-sm text-muted">
+          Це займає лише мить — сторінка оновиться автоматично, щойно оплату
+          буде підтверджено.
+        </p>
+      </div>
+    );
+  }
+
+  if (order.status === "payment_failed" || order.status === "cancelled") {
+    return (
+      <div className="mx-auto max-w-2xl px-6 py-16 text-center">
+        <ClearCartOnMount enabled={false} />
+        <h1 className="font-display text-2xl uppercase tracking-tight">
+          Оплату не підтверджено
+        </h1>
+        <p className="mt-2 text-muted">
+          Замовлення №{order.id.slice(0, 8).toUpperCase()}
+        </p>
+        <p className="mt-6 text-sm text-muted">
+          Оплата не пройшла або була скасована. Товари залишились у кошику —
+          можете спробувати ще раз.
+        </p>
+        <div className="mt-8 flex justify-center">
+          <Link
+            href="/checkout"
+            className="border border-fg px-6 py-3 text-sm uppercase tracking-wide hover:bg-fg hover:text-bg"
+          >
+            Спробувати ще раз
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-2xl px-6 py-16">
-      <ClearCartOnMount />
+      <ClearCartOnMount enabled />
       <OrderConfirmationHeader
         orderNumber={order.id.slice(0, 8).toUpperCase()}
         customerEmail={order.customer_email}

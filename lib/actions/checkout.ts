@@ -3,11 +3,12 @@
 import { createAdminClient } from "@/lib/supabase/server";
 import { resolveShippingCost } from "@/lib/nova-poshta/pricing";
 import { getOrderForAdmin } from "@/lib/admin/orders";
-import { sendEmail, BUSINESS_EMAIL } from "@/lib/email";
+import { createInvoice } from "@/lib/monobank/client";
 import { checkoutSchema, type CheckoutInput } from "./checkout-schema";
 
 export type CheckoutResult =
-  { success: true; orderId: string } | { success: false; error: string };
+  | { success: true; orderId: string; paymentUrl: string }
+  | { success: false; error: string };
 
 export async function placeOrderAction(
   input: CheckoutInput,
@@ -54,72 +55,54 @@ export async function placeOrderAction(
     };
   }
 
-  // STUB: no real payment provider integrated yet — Monobank is a later phase.
-  // This step stands in for what a verified payment webhook would do, and
-  // must be replaced with real server-side payment verification before launch.
-  const { error: paymentError } = await supabase
-    .from("payments")
-    .update({ status: "paid" })
-    .eq("order_id", orderId);
-
-  if (!paymentError) {
-    await supabase
-      .from("orders")
-      .update({ status: "paid", paid_at: new Date().toISOString() })
-      .eq("id", orderId);
+  // The order is created and stock is already decremented at this point —
+  // everything from here is about getting the customer to a real Monobank
+  // payment page. If that fails, the order is left as pending_payment
+  // (same state a genuinely abandoned payment would also leave it in);
+  // there is no separate "cancel the order" step here.
+  const order = await getOrderForAdmin(orderId as string);
+  if (!order) {
+    return {
+      success: false,
+      error: "Замовлення створено, але не вдалося його завантажити.",
+    };
   }
 
-  // Never let a notification failure (Resend hiccup, a slow query, whatever)
-  // block the order from being reported as successful — the order is
-  // already committed at this point, and email is a side effect, not a
-  // condition of checkout succeeding.
+  const siteUrl = process.env.SITE_URL;
+  if (!siteUrl) {
+    console.error("SITE_URL is not configured — cannot start a real payment.");
+    return {
+      success: false,
+      error: "Оплата тимчасово недоступна. Спробуйте пізніше.",
+    };
+  }
+
   try {
-    await notifyOrderPlaced(orderId as string, customerEmail || null);
-  } catch (err) {
-    console.error("Failed to send order notification emails:", err);
-  }
-
-  return { success: true, orderId: orderId as string };
-}
-
-async function notifyOrderPlaced(
-  orderId: string,
-  customerEmail: string | null,
-): Promise<void> {
-  const order = await getOrderForAdmin(orderId);
-  if (!order) return;
-
-  const itemLines = order.order_items
-    .map(
-      (item) =>
-        `${item.product_name}${item.size ? ` (${item.size})` : ""} x${item.quantity} — ${item.line_total} грн`,
-    )
-    .join("\n");
-
-  const summary = [
-    `Замовлення №${order.id.slice(0, 8)}`,
-    "",
-    itemLines,
-    "",
-    `Сума: ${order.subtotal} грн`,
-    `Доставка: ${order.shipping_cost} грн`,
-    `Разом: ${order.total} грн`,
-    "",
-    `Отримувач: ${order.customer_name}, ${order.customer_phone}`,
-    `Нова Пошта: ${order.shipping_city}, ${order.shipping_branch}`,
-  ].join("\n");
-
-  await sendEmail({
-    to: BUSINESS_EMAIL,
-    subject: `Нове замовлення №${order.id.slice(0, 8)}`,
-    text: summary,
-  });
-
-  if (customerEmail) {
-    await sendEmail({
-      to: customerEmail,
-      subject: `BOB Retail — замовлення №${order.id.slice(0, 8)} отримано`,
-      text: `Дякуємо за замовлення!\n\n${summary}`,
+    const invoice = await createInvoice({
+      amount: Math.round(order.total * 100),
+      reference: order.id,
+      destination: `Оплата замовлення №${order.id.slice(0, 8).toUpperCase()}`,
+      basketOrder: order.order_items.map((item) => ({
+        name: `${item.product_name}${item.size ? ` (${item.size})` : ""}`,
+        qty: item.quantity,
+        sum: Math.round(item.unit_price * 100),
+        unit: "шт",
+      })),
+      redirectUrl: `${siteUrl}/order/${order.id}`,
+      webHookUrl: `${siteUrl}/api/webhooks/monobank`,
     });
+
+    await supabase
+      .from("payments")
+      .update({ provider: "monobank", external_reference: invoice.invoiceId })
+      .eq("order_id", order.id);
+
+    return { success: true, orderId: order.id, paymentUrl: invoice.pageUrl };
+  } catch (err) {
+    console.error("Failed to create Monobank invoice:", err);
+    return {
+      success: false,
+      error: "Не вдалося ініціювати оплату. Спробуйте ще раз.",
+    };
   }
 }

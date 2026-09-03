@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useCartStore, useCartSubtotal } from "@/lib/cart-store";
 import { placeOrderAction } from "@/lib/actions/checkout";
 import { CartItemRow } from "@/components/cart/CartItemRow";
@@ -163,12 +164,18 @@ export default function CheckoutPage() {
       // leaving the user stuck on /checkout despite the order having gone
       // through. A full navigation sidesteps whatever that is entirely.
       //
+      // This goes to Monobank's own hosted payment page, not straight to
+      // our order confirmation — Monobank redirects back to /order/[id]
+      // itself once the customer actually pays (or cancels/fails).
+      //
       // The cart is cleared on the confirmation page itself (see
       // ClearCartOnMount), not here — clearing it before this navigation
       // fires made this page re-render with its empty-cart state for the
       // brief moment before the browser actually left, which showed up as
-      // a flash of "Кошик порожній" during checkout.
-      window.location.href = `/order/${result.orderId}`;
+      // a flash of "Кошик порожній" during checkout. It's also now
+      // conditional on the order actually being paid, since the customer
+      // can back out of a real payment.
+      window.location.href = result.paymentUrl;
     } catch {
       // Defense in depth: placeOrderAction itself shouldn't throw (it
       // catches its own non-critical failures), but if it ever does for an
@@ -342,6 +349,36 @@ export default function CheckoutPage() {
                   <span className="h-2 w-2 rounded-full bg-highlight" />
                 </span>
                 <span className="text-sm">Оплата карткою (Monobank)</span>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-4 pb-1">
+                <div className="relative h-6 w-24">
+                  <Image
+                    src="/images/footer_plata_light_bg@2x.png"
+                    alt="plata by mono"
+                    fill
+                    sizes="96px"
+                    className="object-contain object-left"
+                  />
+                </div>
+                <div className="relative h-5 w-10">
+                  <Image
+                    src="/images/footer_visa_light_bg@1x.png"
+                    alt="Visa"
+                    fill
+                    sizes="40px"
+                    className="object-contain object-left"
+                  />
+                </div>
+                <div className="relative h-6 w-9">
+                  <Image
+                    src="/images/footer_mc_light_bg@1x.png"
+                    alt="Mastercard"
+                    fill
+                    sizes="36px"
+                    className="object-contain object-left"
+                  />
+                </div>
               </div>
 
               <button

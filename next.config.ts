@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Self-hosted on a VPS via Docker, not Vercel — standalone bundles only
+  // the node_modules the server actually needs into .next/standalone, so
+  // the runtime image doesn't have to ship the whole workspace.
+  output: "standalone",
   images: {
     remotePatterns: [
       {
@@ -18,6 +22,18 @@ const nextConfig: NextConfig = {
       // headroom over the raw multipart body of a 5MB image.
       bodySizeLimit: "6mb",
     },
+  },
+  // Tells any buffering reverse proxy (the Caddy container in front of this
+  // app — see docs/deployment.md) not to hold back streamed responses.
+  // Next's own self-hosting guide calls this out explicitly; harmless if
+  // the proxy in front already passes streams through untouched.
+  async headers() {
+    return [
+      {
+        source: "/:path*{/}?",
+        headers: [{ key: "X-Accel-Buffering", value: "no" }],
+      },
+    ];
   },
 };
 

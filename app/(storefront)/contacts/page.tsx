@@ -35,10 +35,10 @@ export default function ContactsPage() {
       <div className="border-t border-border">
         <div className="mx-auto flex max-w-6xl flex-col gap-6 px-6 py-12 sm:flex-row sm:items-center sm:justify-between">
           <a
-            href="mailto:frombobwithlove@gmail.com"
+            href="mailto:frombobwithlove.com@gmail.com"
             className="font-display text-3xl tracking-tight hover:text-highlight sm:text-4xl lg:text-5xl"
           >
-            frombobwithlove@gmail.com
+            frombobwithlove.com@gmail.com
           </a>
           <a
             href="tel:+380962414422"

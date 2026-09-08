@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import { CloseIcon } from "./icons";
+import { useProductRequestStore } from "@/lib/product-request-store";
 
 const LINKS = [
   { href: "/catalog", label: "Каталог" },
@@ -11,13 +12,16 @@ const LINKS = [
   { href: "/faq", label: "Питання" },
 ];
 
-// Header nav collapses to this below md — three text links plus a centered
-// video logo plus three icons doesn't fit on a phone-width screen.
+// Header nav collapses to this below lg — a phone/tablet-width screen
+// doesn't have room for four text links plus a centered video logo plus
+// three icons (the client flagged this getting cramped at tablet widths
+// specifically, hence lg: rather than the old md:).
 export function MobileMenu() {
   const [open, setOpen] = useState(false);
+  const openProductRequest = useProductRequestStore((state) => state.open);
 
   return (
-    <div className="md:hidden">
+    <div className="lg:hidden">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -74,6 +78,16 @@ export function MobileMenu() {
                   {link.label}
                 </Link>
               ))}
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  openProductRequest();
+                }}
+                className="border-t border-border px-6 py-4 text-left text-highlight hover:bg-highlight hover:text-bg"
+              >
+                Під замовлення
+              </button>
             </motion.nav>
           </>
         ) : null}

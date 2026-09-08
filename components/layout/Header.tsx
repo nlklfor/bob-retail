@@ -3,12 +3,17 @@ import { VideoLogo } from "./VideoLogo";
 import { SearchToggle } from "./SearchToggle";
 import { MobileMenu } from "./MobileMenu";
 import { CartButton } from "./CartButton";
+import { RequestProductNavButton } from "@/components/product-request/RequestProductNavButton";
 
 // Fixed height (not content-driven) so it stays identical across
 // breakpoints — the homepage hero syncs its own height to this exact value
 // (see the comment in app/(storefront)/page.tsx). Change both together.
 const HEADER_HEIGHT = "h-24"; // 96px
 
+// The inline desktop nav switches to the hamburger menu at lg:, not md: —
+// four items (three links plus "Під замовлення") got visibly cramped at
+// tablet widths under the old md: cutoff; lg: gives it enough room and
+// tablets get the roomier hamburger menu instead.
 const NAV_LINKS = [
   { href: "/catalog", label: "Каталог" },
   { href: "/contacts", label: "Контакти" },
@@ -33,7 +38,7 @@ export function Header() {
           truly centered regardless of how wide the hamburger vs. icon
           cluster are. */}
       <div
-        className={`mx-auto grid ${HEADER_HEIGHT} max-w-6xl grid-cols-[1fr_auto_1fr] items-center gap-2 px-4 md:hidden`}
+        className={`mx-auto grid ${HEADER_HEIGHT} max-w-6xl grid-cols-[1fr_auto_1fr] items-center gap-2 px-4 lg:hidden`}
       >
         <div className="flex items-center">
           <MobileMenu />
@@ -46,7 +51,7 @@ export function Header() {
 
       {/* Desktop: logo left, nav centered, icons right. */}
       <div
-        className={`mx-auto hidden ${HEADER_HEIGHT} max-w-6xl grid-cols-[1fr_auto_1fr] items-center gap-4 px-6 md:grid`}
+        className={`mx-auto hidden ${HEADER_HEIGHT} max-w-6xl grid-cols-[1fr_auto_1fr] items-center gap-4 px-6 lg:grid`}
       >
         <div>
           <VideoLogo />
@@ -61,6 +66,7 @@ export function Header() {
               {link.label}
             </Link>
           ))}
+          <RequestProductNavButton />
         </nav>
         <IconCluster />
       </div>

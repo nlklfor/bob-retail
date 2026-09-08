@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "motion/react";
 import { CloseIcon } from "@/components/layout/icons";
 import { useReducedMotionAware } from "@/lib/useReducedMotionAware";
+import { useProductRequestStore } from "@/lib/product-request-store";
 import {
   uploadProductRequestImageAction,
   submitProductRequestAction,
@@ -15,7 +16,13 @@ const FIELD_CLASS =
 const MAX_PHOTOS = 6;
 
 export function RequestProductTab() {
-  const [open, setOpen] = useState(false);
+  // Shared store, not local state — the header nav's "Під замовлення" entry
+  // (small/tablet screens especially, per the client's own note that the
+  // inline nav gets cramped there) opens this same panel, not just the
+  // edge tab.
+  const open = useProductRequestStore((state) => state.isOpen);
+  const openPanel = useProductRequestStore((state) => state.open);
+  const closePanel = useProductRequestStore((state) => state.close);
   const prefersReducedMotion = useReducedMotionAware();
 
   const [photos, setPhotos] = useState<string[]>([]);
@@ -34,7 +41,7 @@ export function RequestProductTab() {
   }, [open]);
 
   function close() {
-    setOpen(false);
+    closePanel();
   }
 
   function resetForm() {
@@ -100,10 +107,14 @@ export function RequestProductTab() {
 
   return (
     <>
+      {/* Desktop only — below lg: this same panel already has an entry
+          point in the header nav (an inline button ≥lg:, a hamburger-menu
+          item below that), so the edge tab was just redundant clutter
+          overlapping real content on phones/tablets. */}
       <button
         type="button"
-        onClick={() => setOpen(true)}
-        className="fixed left-0 top-1/2 z-40 -translate-y-1/2 border border-l-0 border-fg bg-bg px-3 py-4 text-xs uppercase tracking-wide [writing-mode:vertical-rl] hover:bg-fg hover:text-bg"
+        onClick={() => openPanel()}
+        className="fixed left-0 top-1/2 z-40 hidden -translate-y-1/2 border border-l-0 border-fg bg-bg px-3 py-4 text-xs uppercase tracking-wide [writing-mode:vertical-rl] hover:bg-fg hover:text-bg lg:block"
       >
         Замовити товар, який бажаєте
       </button>

@@ -1,5 +1,10 @@
 services:
   app:
+    # Explicit, stable name — on a low-RAM VPS the image is built elsewhere
+    # and `docker load`ed rather than built in place (see docs/deployment.md),
+    # so `docker compose up` needs a predictable tag to find rather than
+    # Compose's own auto-generated one.
+    image: bob-retail-app:latest
     build:
       context: .
       args:

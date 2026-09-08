@@ -21,7 +21,7 @@ const SOCIAL_LINKS = [
 const INFO_LINKS = [
   { href: "/faq#payment-terms", label: "Умови оплати" },
   { href: "/faq#delivery", label: "Доставка" },
-  { href: "/faq#returns", label: "Повернення" },
+  { href: "/returns", label: "Умови повернення та обміну" },
   { href: "/about", label: "Про Боба" },
 ];
 

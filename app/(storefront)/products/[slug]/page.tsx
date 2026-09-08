@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import type { Metadata } from "next";
 import {
   getActiveProducts,
@@ -148,7 +149,14 @@ export default async function ProductPage({
                     <li>
                       Під замовлення (немає в наявності) — доставка 10-14 днів
                     </li>
-                    <li>Повернення протягом 14 днів</li>
+                    <li>
+                      <Link
+                        href="/returns"
+                        className="text-highlight hover:underline"
+                      >
+                        Умови повернення та обміну
+                      </Link>
+                    </li>
                   </ul>
                 ),
               },

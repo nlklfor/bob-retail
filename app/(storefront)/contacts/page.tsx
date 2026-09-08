@@ -48,6 +48,24 @@ export default function ContactsPage() {
           </a>
         </div>
       </div>
+
+      <div className="border-t border-border">
+        <div className="mx-auto max-w-6xl px-6 py-8">
+          <p className="text-sm text-danger">
+            ‼️ Прийом та реалізація всіх замовлень відбувається виключно через
+            цей сайт або офіційний Instagram-акаунт{" "}
+            <a
+              href="https://www.instagram.com/bobretailer?stkn=Mm50MzhvNXhnbGpr"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-highlight"
+            >
+              @bobretailer
+            </a>
+            . Будь-які інші акаунти від імені Bob — шахрайство.
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

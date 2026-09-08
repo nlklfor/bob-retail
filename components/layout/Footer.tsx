@@ -2,19 +2,27 @@ import Link from "next/link";
 import { NewsletterForm } from "./NewsletterForm";
 import { InstagramIcon, TikTokIcon, TelegramIcon } from "./icons";
 
-// Social links are placeholders (href="#") until real profile URLs exist —
-// swap each one out, that's the only change needed.
+// TikTok is still a placeholder (href="#") until a real profile URL exists —
+// swap it out, that's the only change needed.
 const SOCIAL_LINKS = [
-  { href: "#", label: "Instagram", icon: InstagramIcon },
+  {
+    href: "https://www.instagram.com/bobretailer?stkn=Mm50MzhvNXhnbGpr",
+    label: "Instagram",
+    icon: InstagramIcon,
+  },
   { href: "#", label: "TikTok", icon: TikTokIcon },
-  { href: "#", label: "Telegram", icon: TelegramIcon },
+  {
+    href: "https://t.me/frombobwithlove",
+    label: "Telegram",
+    icon: TelegramIcon,
+  },
 ];
 
 const INFO_LINKS = [
   { href: "/faq#payment-terms", label: "Умови оплати" },
   { href: "/faq#delivery", label: "Доставка" },
   { href: "/faq#returns", label: "Повернення" },
-  { href: "/about", label: "Про нас" },
+  { href: "/about", label: "Про Боба" },
 ];
 
 export function Footer() {

@@ -275,7 +275,7 @@ export function ProductForm({ categories, product, action }: Props) {
           multiple
           disabled={uploading}
           onChange={(e) => handleFilesSelected(e.target.files)}
-          className="mt-3 text-sm"
+          className="mt-3 text-sm text-muted file:mr-3 file:cursor-pointer file:border file:border-fg file:bg-transparent file:px-4 file:py-2 file:text-xs file:uppercase file:tracking-wide file:text-fg hover:file:bg-fg hover:file:text-bg disabled:opacity-40"
         />
         {uploading ? (
           <p className="mt-1 text-sm text-muted">Завантаження...</p>

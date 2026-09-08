@@ -21,13 +21,14 @@ export default async function Home() {
     <>
       <IntroSplash />
 
-      {/* Full-screen hero, full-bleed under the header — fills the rest of
-          the viewport below the sticky header exactly, so the background
-          gets the whole screen rather than a cropped strip. 96px here must
-          match Header.tsx's HEADER_HEIGHT (h-24) — the header is a fixed
-          height now specifically so this number stays correct across
-          breakpoints instead of needing to be re-measured. */}
-      <section className="relative h-[calc(100vh-96px)] w-full bg-surface">
+      {/* Full-screen hero on larger screens (fills the rest of the viewport
+          below the sticky header — 96px must match Header.tsx's
+          HEADER_HEIGHT). On phones that container is tall and narrow, and
+          the source image is a wide 16:9 landscape shot — object-cover was
+          cropping it down to a thin center sliver, cutting off the logo
+          marks in every corner. Matching the container to the image's own
+          aspect ratio below sm: shows the whole image instead. */}
+      <section className="relative aspect-[16/9] w-full bg-surface sm:aspect-auto sm:h-[calc(100vh-96px)]">
         <Image
           src="/images/frombobwithlove.png"
           alt=""

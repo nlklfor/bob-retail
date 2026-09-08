@@ -82,7 +82,7 @@ function Slot({
         accept="image/png,image/jpeg,image/webp,image/gif"
         disabled={uploading}
         onChange={(e) => handleFileSelected(e.target.files?.[0])}
-        className="mt-2 text-sm"
+        className="mt-2 text-sm text-muted file:mr-3 file:cursor-pointer file:border file:border-fg file:bg-transparent file:px-4 file:py-2 file:text-xs file:uppercase file:tracking-wide file:text-fg hover:file:bg-fg hover:file:text-bg disabled:opacity-40"
       />
       {uploading ? (
         <p className="mt-1 text-sm text-muted">Завантаження...</p>

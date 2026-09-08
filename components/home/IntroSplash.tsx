@@ -68,7 +68,7 @@ export function IntroSplash() {
             playsInline
             onEnded={hide}
             onError={hide}
-            className="h-auto w-auto max-h-[500px] max-w-[500px] object-contain"
+            className="h-auto w-auto max-h-[85vh] max-w-[90vw] object-contain sm:max-h-[500px] sm:max-w-[500px]"
           />
         </motion.div>
       ) : null}

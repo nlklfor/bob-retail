@@ -75,3 +75,18 @@ export type OrderItem = {
 export type OrderWithItems = Order & {
   order_items: OrderItem[];
 };
+
+export type ProductRequest = {
+  id: string;
+  name: string | null;
+  photos: string[];
+  size: string;
+  instagram_handle: string;
+  color: string | null;
+  material: string | null;
+  expected_cost: number | null;
+  link: string | null;
+  description: string | null;
+  status: string;
+  created_at: string;
+};

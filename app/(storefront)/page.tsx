@@ -30,7 +30,7 @@ export default async function Home() {
           aspect ratio below sm: shows the whole image instead. */}
       <section className="relative aspect-[16/9] w-full bg-surface sm:aspect-auto sm:h-[calc(100vh-96px)]">
         <Image
-          src="/images/frombobwithlove.png"
+          src="/images/bob_hero.png"
           alt=""
           fill
           priority

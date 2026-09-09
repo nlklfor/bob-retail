@@ -25,6 +25,14 @@ const INFO_LINKS = [
   { href: "/about", label: "Про Боба" },
 ];
 
+// Smaller, quieter row — legal pages people look for but don't need
+// the same visual weight as the main info links above.
+const LEGAL_LINKS = [
+  { href: "/terms", label: "Публічна оферта" },
+  { href: "/privacy", label: "Конфіденційність" },
+  { href: "/cookies", label: "Cookie" },
+];
+
 export function Footer() {
   return (
     <footer className="mt-auto bg-footer-bg text-footer-fg">
@@ -55,6 +63,14 @@ export function Footer() {
 
         <nav className="mt-10 flex flex-wrap gap-x-6 gap-y-3 border-t border-footer-fg/15 pt-6 text-sm uppercase tracking-wide">
           {INFO_LINKS.map(({ href, label }) => (
+            <Link key={href} href={href} className="hover:text-highlight">
+              {label}
+            </Link>
+          ))}
+        </nav>
+
+        <nav className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-xs uppercase tracking-wide text-footer-fg/50">
+          {LEGAL_LINKS.map(({ href, label }) => (
             <Link key={href} href={href} className="hover:text-highlight">
               {label}
             </Link>

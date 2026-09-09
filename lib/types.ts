@@ -90,3 +90,19 @@ export type ProductRequest = {
   status: string;
   created_at: string;
 };
+
+export type PriceOffer = {
+  id: string;
+  product_id: string | null;
+  product_name: string;
+  product_slug: string;
+  size: string | null;
+  original_price: number;
+  offered_price: number;
+  customer_name: string;
+  customer_social: string;
+  customer_phone: string | null;
+  customer_email: string | null;
+  status: string;
+  created_at: string;
+};

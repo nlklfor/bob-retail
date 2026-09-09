@@ -8,6 +8,7 @@ import {
   getProductBySlug,
 } from "@/lib/products";
 import { AddToCartForm } from "@/components/product/AddToCartForm";
+import { PriceOfferForm } from "@/components/product/PriceOfferForm";
 import { Accordion } from "@/components/product/Accordion";
 import { Carousel } from "@/components/home/Carousel";
 import { NewArrivalsSection } from "@/components/home/NewArrivalsSection";
@@ -103,8 +104,9 @@ export default async function ProductPage({
             {formatPrice(product.price)} грн
           </p>
 
-          <div className="mt-8">
+          <div className="mt-8 space-y-3">
             <AddToCartForm product={product} />
+            <PriceOfferForm product={product} />
           </div>
 
           <Accordion

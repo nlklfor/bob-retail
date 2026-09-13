@@ -39,8 +39,8 @@ export default function TermsPage() {
           </h2>
           <ul className="mt-3 list-disc space-y-2 pl-4 leading-relaxed text-muted">
             <li>
-              <span className="text-fg">Продавець</span> — [ФОП, повна назва,
-              реєстраційні дані — уточнити].
+              <span className="text-fg">Продавець</span> — ФОП Дерев&apos;янко
+              Людмила Володимирівна (ІПН 2940908643).
             </li>
             <li>
               <span className="text-fg">Покупець</span> — будь-яка дієздатна
@@ -257,7 +257,15 @@ export default function TermsPage() {
             14. Реквізити продавця
           </h2>
           <p className="mt-3 leading-relaxed text-muted">
-            [ФОП, ІПН/ЄДРПОУ, юридична адреса — уточнити]
+            ФОП Дерев&apos;янко Людмила Володимирівна
+            <br />
+            ІПН/ЄДРПОУ: 2940908643
+            <br />
+            Юридична адреса: [уточнити]
+            <br />
+            IBAN: UA433220010000026009370120166
+            <br />
+            Банк: АТ «УНІВЕРСАЛ БАНК», МФО 322001, ЄДРПОУ банку 21133352
             <br />
             Email:{" "}
             <a

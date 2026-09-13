@@ -158,10 +158,10 @@ export default function PrivacyPage() {
             </a>{" "}
             або{" "}
             <a
-              href="tel:+380962414422"
+              href="tel:+380950139807"
               className="text-highlight hover:underline"
             >
-              096 241 44 22
+              095 013 98 07
             </a>
             .
           </p>

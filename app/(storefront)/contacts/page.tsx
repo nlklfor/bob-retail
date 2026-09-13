@@ -41,10 +41,10 @@ export default function ContactsPage() {
             frombobwithlove.com@gmail.com
           </a>
           <a
-            href="tel:+380962414422"
+            href="tel:+380950139807"
             className="font-display text-3xl tracking-tight hover:text-highlight sm:text-4xl lg:text-5xl"
           >
-            096 241 44 22
+            095 013 98 07
           </a>
         </div>
       </div>

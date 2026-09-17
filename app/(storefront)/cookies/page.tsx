@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { DraftLegalNotice } from "@/components/legal/DraftLegalNotice";
 
 export const metadata: Metadata = {
   title: "Файли cookie",
@@ -14,11 +13,7 @@ export default function CookiesPage() {
         Файли cookie
       </h1>
 
-      <div className="mt-10">
-        <DraftLegalNotice />
-      </div>
-
-      <div className="space-y-10">
+      <div className="mt-10 space-y-10">
         <section>
           <p className="leading-relaxed text-muted">
             Цей сайт не використовує рекламні чи трекінгові cookie і не передає

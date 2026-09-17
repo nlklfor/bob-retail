@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { DraftLegalNotice } from "@/components/legal/DraftLegalNotice";
 
 export const metadata: Metadata = {
   title: "Публічна оферта",
@@ -14,11 +13,7 @@ export default function TermsPage() {
         Публічна оферта
       </h1>
 
-      <div className="mt-10">
-        <DraftLegalNotice />
-      </div>
-
-      <div className="space-y-10">
+      <div className="mt-10 space-y-10">
         <section>
           <h2 className="font-display text-xl uppercase tracking-tight">
             1. Загальні положення

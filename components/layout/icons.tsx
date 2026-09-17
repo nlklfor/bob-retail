@@ -119,23 +119,6 @@ export function InstagramIcon() {
   );
 }
 
-export function TikTokIcon() {
-  return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      aria-hidden="true"
-    >
-      <path d="M14 3v10.8a3.2 3.2 0 1 1-2.4-3.1" />
-      <path d="M14 3c.4 2.2 2 3.8 4.2 4.1" />
-    </svg>
-  );
-}
-
 export function TelegramIcon() {
   return (
     <svg

@@ -63,7 +63,7 @@ All tables live in `public`, RLS enabled everywhere, migrations are incremental 
 
 ## What's explicitly stubbed — not real yet, flagged in code comments
 
-- **Social links**: Footer Instagram/TikTok/Telegram icons still point at `href="#"` — no real profile URLs yet.
+- **Social links**: Footer shows real Instagram and Telegram icons. TikTok was removed entirely (client decision, 2026-09-17) — no account for it, so no placeholder either.
 - **Contact messages have no admin viewer yet**: they save for real to `contact_messages`, but there's no `/admin` page to read them (same as `newsletter_subscribers` — check via the Supabase dashboard for now, or ask for an admin inbox page to be built).
 
 ## Nova Poshta integration (2026-08-16)
@@ -104,7 +104,7 @@ Migrations are applied incrementally as the client tests locally — this list i
 - **Monobank real integration is built** (see the dedicated section above) — what's left is entirely the deployment above: `SITE_URL` needs to point at the real domain before Monobank can deliver a webhook, and a scheduled sweep for abandoned (never-returned-to) pending payments is still not built.
 - **Product requests ("Замовити товар") — built (2026-09-03)**: a vertical tab on the storefront opens a form (photo + size required, Instagram required for contact, everything else optional) saving to a new `product_requests` table, with a full admin view at `/admin/product-requests`. Real About Us copy and the real Instagram link are also in.
 - **Price offers ("Торг") — built (2026-09-09), migration not yet applied**: a "Запропонувати свою ціну" form on every product page, a slider capped at 300 UAH off the listed price (enforced both client-side and by DB check constraints), saving to a new `price_offers` table with a full admin view at `/admin/price-offers`. No in-app auto-checkout at the haggled price — same manual pattern as product requests: staff review the offer in the panel and, if accepted, contact the customer (phone/email/Telegram/Instagram) with a real Monobank payment link at the agreed price, made the same way real orders' payment links already are.
-- **Design/animation pass** — no longer deferred, actively in progress and mostly built (palette, typography, homepage sections, product page, contact page, motion — see `docs/design-direction.md` for the full living log). Open items: an admin inbox for contact/newsletter messages, a real TikTok profile URL (Instagram and Telegram are both real now), and whatever the client raises next.
+- **Design/animation pass** — no longer deferred, actively in progress and mostly built (palette, typography, homepage sections, product page, contact page, motion — see `docs/design-direction.md` for the full living log). Open items: an admin inbox for contact/newsletter messages, and whatever the client raises next.
 
 ## Business/process context worth remembering
 

@@ -1,16 +1,13 @@
 import Link from "next/link";
 import { NewsletterForm } from "./NewsletterForm";
-import { InstagramIcon, TikTokIcon, TelegramIcon } from "./icons";
+import { InstagramIcon, TelegramIcon } from "./icons";
 
-// TikTok is still a placeholder (href="#") until a real profile URL exists —
-// swap it out, that's the only change needed.
 const SOCIAL_LINKS = [
   {
     href: "https://www.instagram.com/bobretailer?stkn=Mm50MzhvNXhnbGpr",
     label: "Instagram",
     icon: InstagramIcon,
   },
-  { href: "#", label: "TikTok", icon: TikTokIcon },
   {
     href: "https://t.me/frombobwithlove",
     label: "Telegram",

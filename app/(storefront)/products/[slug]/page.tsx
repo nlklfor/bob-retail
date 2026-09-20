@@ -60,6 +60,9 @@ export default async function ProductPage({
   const categoryName = product.category_id
     ? (categories.find((c) => c.id === product.category_id)?.name ?? null)
     : null;
+  // Size guide only makes sense for shoes — matching by name rather than a
+  // hardcoded category id, since category ids differ per environment.
+  const isFootwear = categoryName === "Взуття";
   const otherProducts = allProducts.filter((p) => p.id !== product.id);
 
   return (
@@ -105,7 +108,7 @@ export default async function ProductPage({
           </p>
 
           <div className="mt-8 space-y-3">
-            <AddToCartForm product={product} />
+            <AddToCartForm product={product} isFootwear={isFootwear} />
             <PriceOfferForm product={product} />
           </div>
 

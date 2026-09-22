@@ -9,6 +9,7 @@ import {
 } from "@/lib/products";
 import { AddToCartForm } from "@/components/product/AddToCartForm";
 import { PriceOfferForm } from "@/components/product/PriceOfferForm";
+import { SizeGuideModal } from "@/components/product/SizeGuideModal";
 import { Accordion } from "@/components/product/Accordion";
 import { Carousel } from "@/components/home/Carousel";
 import { NewArrivalsSection } from "@/components/home/NewArrivalsSection";
@@ -60,9 +61,6 @@ export default async function ProductPage({
   const categoryName = product.category_id
     ? (categories.find((c) => c.id === product.category_id)?.name ?? null)
     : null;
-  // Size guide only makes sense for shoes — matching by name rather than a
-  // hardcoded category id, since category ids differ per environment.
-  const isFootwear = categoryName === "Взуття";
   const otherProducts = allProducts.filter((p) => p.id !== product.id);
 
   return (
@@ -106,9 +104,12 @@ export default async function ProductPage({
           <p className="text-accent text-lg mt-3">
             {formatPrice(product.price)} грн
           </p>
+          <div className="mt-2">
+            <SizeGuideModal />
+          </div>
 
-          <div className="mt-8 space-y-3">
-            <AddToCartForm product={product} isFootwear={isFootwear} />
+          <div className="mt-6 space-y-3">
+            <AddToCartForm product={product} />
             <PriceOfferForm product={product} />
           </div>
 

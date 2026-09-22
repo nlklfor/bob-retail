@@ -3,16 +3,9 @@
 import { useState } from "react";
 import { useCartStore } from "@/lib/cart-store";
 import { useToastStore } from "@/lib/toast-store";
-import { SizeGuideModal } from "./SizeGuideModal";
 import type { ProductWithVariants } from "@/lib/types";
 
-export function AddToCartForm({
-  product,
-  isFootwear = false,
-}: {
-  product: ProductWithVariants;
-  isFootwear?: boolean;
-}) {
+export function AddToCartForm({ product }: { product: ProductWithVariants }) {
   const variants = product.product_variants.filter((v) => v.is_active);
   const hasSizes = variants.some((v) => v.size !== null);
 
@@ -51,10 +44,9 @@ export function AddToCartForm({
     <div className="space-y-4">
       {hasSizes && (
         <div>
-          <div className="mb-2 flex items-center justify-between">
-            <p className="text-sm uppercase tracking-wide text-muted">Розмір</p>
-            {isFootwear ? <SizeGuideModal /> : null}
-          </div>
+          <p className="mb-2 text-sm uppercase tracking-wide text-muted">
+            Розмір
+          </p>
           <div className="flex flex-wrap gap-2">
             {variants.map((variant) => {
               const outOfStock = variant.stock_quantity < 1;

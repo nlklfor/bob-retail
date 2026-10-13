@@ -57,9 +57,25 @@ export type Order = {
   shipping_branch: string;
   subtotal: number;
   shipping_cost: number;
+  discount: number;
+  promo_code: string | null;
   total: number;
   created_at: string;
   paid_at: string | null;
+};
+
+export type PromoCodeKind = "free_shipping" | "fixed_amount";
+
+export type PromoCode = {
+  id: string;
+  code: string;
+  kind: PromoCodeKind;
+  amount: number | null;
+  min_order_amount: number | null;
+  usage_limit: number | null;
+  times_used: number;
+  is_welcome: boolean;
+  created_at: string;
 };
 
 export type OrderItem = {

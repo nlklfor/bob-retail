@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { resolveShippingCost } from "@/lib/nova-poshta/pricing";
 import { getOrderForAdmin } from "@/lib/admin/orders";
 import { createInvoice } from "@/lib/monobank/client";
+import { normalizePromoCode } from "@/lib/promo-discount";
 import { checkoutSchema, type CheckoutInput } from "./checkout-schema";
 
 export type CheckoutResult =
@@ -26,6 +27,7 @@ export async function placeOrderAction(
     shippingCityRef,
     shippingBranch,
     items,
+    promoCode,
   } = parsed.data;
 
   // Never trust a client-supplied shipping cost — re-quote it server-side
@@ -46,6 +48,9 @@ export async function placeOrderAction(
     p_shipping_city: shippingCity,
     p_shipping_branch: shippingBranch,
     p_shipping_cost: shippingCost,
+    // Always sent, even as null — it's what routes this call to the
+    // promo-aware place_order() (see the create_promo_codes migration).
+    p_promo_code: promoCode ? normalizePromoCode(promoCode) : null,
   });
 
   if (error || !orderId) {

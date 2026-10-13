@@ -10,6 +10,7 @@ export const checkoutSchema = z.object({
   shippingCityRef: z.string().min(1),
   shippingBranch: z.string().min(1).max(200),
   shippingWarehouseRef: z.string().min(1),
+  promoCode: z.string().trim().max(32).optional().or(z.literal("")),
   items: z
     .array(
       z.object({

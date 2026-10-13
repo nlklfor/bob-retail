@@ -62,6 +62,14 @@ export default async function AdminOrderDetailPage({
           <span className="text-muted">Доставка</span>
           <span>{formatPrice(order.shipping_cost)} грн</span>
         </div>
+        {order.discount > 0 ? (
+          <div className="flex justify-between">
+            <span className="text-muted">
+              Промокод{order.promo_code ? ` ${order.promo_code}` : ""}
+            </span>
+            <span>−{formatPrice(order.discount)} грн</span>
+          </div>
+        ) : null}
         <div className="flex justify-between border-t border-border pt-2 mt-2 text-accent">
           <span className="uppercase tracking-wide">Разом</span>
           <span>{formatPrice(order.total)} грн</span>

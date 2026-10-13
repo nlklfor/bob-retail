@@ -74,11 +74,16 @@ async function notifyOrderPaid(orderId: string): Promise<void> {
     "",
     `Сума: ${order.subtotal} грн`,
     `Доставка: ${order.shipping_cost} грн`,
+    order.discount > 0
+      ? `Промокод${order.promo_code ? ` ${order.promo_code}` : ""}: −${order.discount} грн`
+      : null,
     `Разом: ${order.total} грн`,
     "",
     `Отримувач: ${order.customer_name}, ${order.customer_phone}`,
     `Нова Пошта: ${order.shipping_city}, ${order.shipping_branch}`,
-  ].join("\n");
+  ]
+    .filter((line) => line !== null)
+    .join("\n");
 
   await sendEmail({
     to: BUSINESS_EMAIL,

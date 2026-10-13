@@ -4,6 +4,12 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useCartStore, useCartSubtotal } from "@/lib/cart-store";
 import { placeOrderAction } from "@/lib/actions/checkout";
+import { checkPromoCodeAction } from "@/lib/actions/promo-codes";
+import {
+  calcPromoDiscount,
+  describePromo,
+  type AppliedPromo,
+} from "@/lib/promo-discount";
 import { CartItemRow } from "@/components/cart/CartItemRow";
 import { EmptyCartState } from "@/components/cart/EmptyCartState";
 import { formatPrice } from "@/lib/format";
@@ -50,6 +56,17 @@ export default function CheckoutPage() {
   const [resolvedQuoteKey, setResolvedQuoteKey] = useState<string | null>(null);
 
   const [showOtherPaymentOptions, setShowOtherPaymentOptions] = useState(false);
+
+  const [promoInput, setPromoInput] = useState("");
+  const [appliedPromo, setAppliedPromo] = useState<AppliedPromo | null>(null);
+  const [promoError, setPromoError] = useState<string | null>(null);
+  const [checkingPromo, setCheckingPromo] = useState(false);
+  // The cart can change after a code is applied (an item removed) — a code
+  // with a minimum order then stops applying until the cart is back above it.
+  const promoApplies =
+    appliedPromo !== null &&
+    (appliedPromo.minOrderAmount === null ||
+      subtotal >= appliedPromo.minOrderAmount);
 
   const cityQueryIsSettled = selectedCity && cityQuery === selectedCity.name;
   useEffect(() => {
@@ -127,6 +144,26 @@ export default function CheckoutPage() {
     setWarehouseResults([]);
   }
 
+  async function applyPromo() {
+    if (checkingPromo || !promoInput.trim()) return;
+    setCheckingPromo(true);
+    setPromoError(null);
+    const result = await checkPromoCodeAction(promoInput, subtotal);
+    if (result.success) {
+      // One code per order — applying a new one replaces the old.
+      setAppliedPromo(result.promo);
+      setPromoInput("");
+    } else {
+      setPromoError(result.error);
+    }
+    setCheckingPromo(false);
+  }
+
+  function removePromo() {
+    setAppliedPromo(null);
+    setPromoError(null);
+  }
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (submitting || !selectedCity || !selectedWarehouse) return;
@@ -146,6 +183,7 @@ export default function CheckoutPage() {
         shippingCityRef: selectedCity.ref,
         shippingBranch: selectedWarehouse.description,
         shippingWarehouseRef: selectedWarehouse.ref,
+        promoCode: promoApplies && appliedPromo ? appliedPromo.code : "",
         items: items.map((item) => ({
           variantId: item.variantId,
           quantity: item.quantity,
@@ -198,7 +236,11 @@ export default function CheckoutPage() {
   }
 
   const canSubmit = Boolean(selectedCity && selectedWarehouse);
-  const total = subtotal + (visibleShippingCost ?? 0);
+  const discount =
+    promoApplies && appliedPromo
+      ? calcPromoDiscount(appliedPromo, subtotal, visibleShippingCost ?? 0)
+      : 0;
+  const total = subtotal + (visibleShippingCost ?? 0) - discount;
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-12">
@@ -435,7 +477,64 @@ export default function CheckoutPage() {
             ))}
           </div>
 
-          <div className="mt-6 space-y-2 border-t border-border pt-4">
+          <div className="mt-6 border-t border-border pt-4">
+            {appliedPromo ? (
+              <div className="flex items-center justify-between gap-4 text-sm">
+                <span>
+                  Промокод{" "}
+                  <span className="text-highlight">{appliedPromo.code}</span>{" "}
+                  <span className="text-muted">
+                    — {describePromo(appliedPromo)}
+                  </span>
+                </span>
+                <button
+                  type="button"
+                  onClick={removePromo}
+                  className="text-muted hover:text-danger"
+                >
+                  Прибрати
+                </button>
+              </div>
+            ) : (
+              <div className="flex gap-3">
+                <input
+                  type="text"
+                  value={promoInput}
+                  onChange={(e) => setPromoInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    // Enter here applies the code instead of submitting the
+                    // whole checkout form.
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      applyPromo();
+                    }
+                  }}
+                  placeholder="Промокод"
+                  aria-label="Промокод"
+                  className={`${FIELD_CLASS} uppercase placeholder:normal-case`}
+                />
+                <button
+                  type="button"
+                  onClick={applyPromo}
+                  disabled={checkingPromo || !promoInput.trim()}
+                  className="shrink-0 border border-fg px-4 text-sm uppercase tracking-wide hover:bg-fg hover:text-bg disabled:opacity-30"
+                >
+                  {checkingPromo ? "..." : "Застосувати"}
+                </button>
+              </div>
+            )}
+            {promoError ? (
+              <p className="mt-2 text-sm text-danger">{promoError}</p>
+            ) : null}
+            {appliedPromo && !promoApplies && appliedPromo.minOrderAmount ? (
+              <p className="mt-2 text-sm text-pending">
+                Промокод діє для замовлень від{" "}
+                {formatPrice(appliedPromo.minOrderAmount)} грн.
+              </p>
+            ) : null}
+          </div>
+
+          <div className="mt-4 space-y-2 border-t border-border pt-4">
             <div className="flex justify-between text-sm">
               <span className="text-muted">Сума</span>
               <span>{formatPrice(subtotal)} грн</span>
@@ -452,6 +551,12 @@ export default function CheckoutPage() {
                       : "—"}
               </span>
             </div>
+            {discount > 0 && appliedPromo ? (
+              <div className="flex justify-between text-sm">
+                <span className="text-muted">Промокод {appliedPromo.code}</span>
+                <span>−{formatPrice(discount)} грн</span>
+              </div>
+            ) : null}
             <div className="flex justify-between border-t border-border pt-3 text-lg font-semibold">
               <span>Разом</span>
               <span>{formatPrice(total)} грн</span>

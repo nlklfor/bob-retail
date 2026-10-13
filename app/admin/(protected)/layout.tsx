@@ -12,7 +12,7 @@ export default async function AdminLayout({
   return (
     <div className="mx-auto max-w-6xl px-6 py-8">
       <div className="flex items-center justify-between border-b border-border pb-4">
-        <nav className="flex gap-6 text-sm uppercase tracking-wide">
+        <nav className="flex flex-wrap gap-x-6 gap-y-2 text-sm uppercase tracking-wide">
           <Link href="/admin" className="hover:text-accent">
             Панель керування
           </Link>
@@ -33,6 +33,9 @@ export default async function AdminLayout({
           </Link>
           <Link href="/admin/price-offers" className="hover:text-accent">
             Торг
+          </Link>
+          <Link href="/admin/promo-codes" className="hover:text-accent">
+            Промокоди
           </Link>
         </nav>
         <form action={signOutAction}>

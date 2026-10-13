@@ -145,6 +145,14 @@ export default async function OrderConfirmationPage({
           <span className="text-muted">Доставка</span>
           <span>{formatPrice(order.shipping_cost)} грн</span>
         </div>
+        {order.discount > 0 ? (
+          <div className="flex justify-between">
+            <span className="text-muted">
+              Промокод{order.promo_code ? ` ${order.promo_code}` : ""}
+            </span>
+            <span>−{formatPrice(order.discount)} грн</span>
+          </div>
+        ) : null}
         <div className="mt-2 flex justify-between border-t border-border pt-2 text-lg font-semibold">
           <span className="uppercase tracking-wide">Разом</span>
           <span>{formatPrice(order.total)} грн</span>

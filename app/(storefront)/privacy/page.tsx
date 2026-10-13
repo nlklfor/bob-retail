@@ -71,11 +71,15 @@ export default function PrivacyPage() {
           </h2>
           <p className="mt-3 leading-relaxed text-muted">
             Для виконання замовлення частина даних передається виключно
-            сервісам, необхідним для доставки й оплати:
+            сервісам, необхідним для доставки, оплати та зв&apos;язку з вами:
           </p>
           <ul className="mt-2 list-disc space-y-1 pl-4 leading-relaxed text-muted">
             <li>Нова Пошта — для доставки замовлення</li>
             <li>Monobank — для обробки оплати карткою</li>
+            <li>
+              Resend — для надсилання email-листів (підтвердження замовлень,
+              розсилка)
+            </li>
           </ul>
           <p className="mt-3 leading-relaxed text-muted">
             Ці сервіси обробляють дані відповідно до власних політик
@@ -105,10 +109,10 @@ export default function PrivacyPage() {
             персональних даних, а також відкликати згоду на розсилку в будь-який
             момент — напишіть нам на{" "}
             <a
-              href="mailto:frombobwithlove.com@gmail.com"
+              href="mailto:frombobwithlove@gmail.com"
               className="text-highlight hover:underline"
             >
-              frombobwithlove.com@gmail.com
+              frombobwithlove@gmail.com
             </a>
             .
           </p>
@@ -146,10 +150,10 @@ export default function PrivacyPage() {
           <p className="mt-3 leading-relaxed text-muted">
             Питання щодо обробки персональних даних — на{" "}
             <a
-              href="mailto:frombobwithlove.com@gmail.com"
+              href="mailto:frombobwithlove@gmail.com"
               className="text-highlight hover:underline"
             >
-              frombobwithlove.com@gmail.com
+              frombobwithlove@gmail.com
             </a>{" "}
             або{" "}
             <a

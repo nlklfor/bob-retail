@@ -1,3 +1,18 @@
 {$DOMAIN} {
 	reverse_proxy app:3000
 }
+
+# www.<domain> gets its own certificate and permanently redirects to the
+# bare domain, so there's one canonical address (and Monobank's redirect
+# back after payment always lands on the same origin the cart lives on).
+www.{$DOMAIN} {
+	redir https://{$DOMAIN}{uri} permanent
+}
+
+# The temporary address the site ran on before frombobwithlove.com went
+# live (2026-10-13) — redirected rather than dropped so old links and
+# bookmarks still land on the real site. Safe to remove once nothing
+# points at it anymore.
+91-239-232-140.sslip.io {
+	redir https://{$DOMAIN}{uri} permanent
+}

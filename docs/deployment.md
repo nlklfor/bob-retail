@@ -80,17 +80,34 @@ docker compose up -d
 
 ## DNS
 
-Point the domain's `A` record at the VPS's public IPv4 address. Caddy needs port 80 reachable from the internet to complete the Let's Encrypt HTTP challenge the first time it starts — if there's a firewall in front of the VPS (MiroHost's control panel, `ufw`, etc.), make sure 80 and 443 are open.
+The live domain is **`frombobwithlove.com`**, registered at HostPro, using HostPro's nameservers (`ns1`–`ns4.hostpro.ua`) — so every DNS record is managed in **HostPro's panel → the domain → DNS records**, not on the VPS itself.
+
+- `A` record for `@` and for `www` → the VPS's IPv4 (`91.239.232.140`). Caddy needs port 80 reachable from the internet to complete the Let's Encrypt HTTP challenge the first time it starts — keep 80 and 443 open in `ufw`.
+- Resend's records (see below) are added alongside these; they don't touch the `A` records.
 
 ## After the domain is live
 
 Update `.env` on the VPS:
 
 ```
-SITE_URL=https://your-real-domain.com
+DOMAIN=frombobwithlove.com
+SITE_URL=https://frombobwithlove.com
 ```
 
-then `docker compose up -d` again to pick it up (no rebuild needed — it's a runtime env var, not baked into the image). **This step is what actually turns on real Monobank payments** — until `SITE_URL` points at the real domain, Monobank has nowhere to deliver its webhook, so `applyInvoiceStatus()` never fires for real and orders sit in `pending_payment` until the fallback check catches up (see `docs/project-status.md`'s Monobank section).
+then `docker compose up -d` again to pick it up (no rebuild needed — both are runtime env vars, not baked into the image). Caddy obtains certificates for both `frombobwithlove.com` and `www.frombobwithlove.com` and redirects `www` to the bare domain (see `Caddyfile`). **This step is also what turns on real Monobank payments for real customers** — `SITE_URL` is where Monobank sends its webhook and where it redirects the customer back after paying.
+
+## Email (Resend)
+
+1. Sign up at resend.com, **Domains → Add Domain** → `frombobwithlove.com`, region EU.
+2. Add the DNS records Resend shows (a `resend._domainkey` TXT for DKIM, an MX + TXT on `send` for bounces/SPF, optionally `_dmarc`) in HostPro's DNS panel, then **Verify** in Resend.
+3. **API Keys → Create** (sending access, this domain only). Put it in `.env.local` locally and in the VPS `.env`:
+
+```
+RESEND_API_KEY=re_...
+RESEND_FROM_EMAIL=BOB Retail <hello@frombobwithlove.com>
+```
+
+The sending domain has no mailbox — every email sets `Reply-To` to the business Gmail (`BUSINESS_EMAIL` in `lib/email.ts`), so customer replies land there. Until `RESEND_API_KEY` is set, `sendEmail()` logs and skips instead of failing.
 
 ## Redeploying after future changes
 

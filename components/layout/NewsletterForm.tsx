@@ -15,19 +15,26 @@ export function NewsletterForm() {
     setStatus("submitting");
     setError(null);
 
-    const result = await subscribeAction(new FormData(e.currentTarget));
+    // Captured up front — React nulls e.currentTarget once the handler
+    // awaits, so reading it after the action call would throw.
+    const form = e.currentTarget;
+    const result = await subscribeAction(new FormData(form));
     if (!result.success) {
       setError(result.error);
       setStatus("idle");
       return;
     }
 
+    form.reset();
     setStatus("done");
-    e.currentTarget.reset();
   }
 
   if (status === "done") {
-    return <p className="text-sm text-footer-fg">Дякуємо за підписку!</p>;
+    return (
+      <p className="text-sm text-footer-fg">
+        Дякуємо за підписку! Перевірте пошту — там ваш промокод.
+      </p>
+    );
   }
 
   return (

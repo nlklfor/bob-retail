@@ -36,8 +36,11 @@ export function Footer() {
       <div className="mx-auto max-w-6xl px-6 py-10">
         <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="mb-3 text-sm uppercase tracking-wide text-footer-fg/60">
+            <p className="text-sm uppercase tracking-wide text-footer-fg/60">
               Розсилка
+            </p>
+            <p className="mb-3 mt-1 text-sm text-footer-fg">
+              Підпишіться — і отримайте промокод на безкоштовну доставку.
             </p>
             <NewsletterForm />
           </div>

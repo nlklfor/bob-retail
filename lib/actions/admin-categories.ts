@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import { revalidatePath } from "next/cache";
 import { requireStaffSession } from "@/lib/admin/dal";
 import { updateCategoryImage } from "@/lib/admin/categories";
 
@@ -24,5 +25,7 @@ export async function updateCategoryImageAction(
   }
 
   await updateCategoryImage(parsed.data.id, parsed.data.imageUrl);
+  // The homepage category showcase is a static page — refresh it now.
+  revalidatePath("/");
   return { success: true };
 }

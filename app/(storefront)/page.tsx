@@ -10,6 +10,13 @@ import { NewArrivalsSection } from "@/components/home/NewArrivalsSection";
 import { FeatureImages } from "@/components/home/FeatureImages";
 import { CategoryShowcase } from "@/components/home/CategoryShowcase";
 
+// The homepage is prerendered as a static page. Admin saves that affect it
+// (products, categories, home content) refresh it instantly via
+// revalidatePath("/"); this is the safety net for changes that don't go
+// through admin — e.g. stock changing as orders come in — so it's never
+// more than 5 minutes stale.
+export const revalidate = 300;
+
 export default async function Home() {
   const [products, categories, featureImages] = await Promise.all([
     getActiveProducts(),

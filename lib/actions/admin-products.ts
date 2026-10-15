@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireStaffSession } from "@/lib/admin/dal";
 import {
@@ -101,6 +102,9 @@ export async function createProductAction(
   } catch (err) {
     return { error: friendlyProductError(err) };
   }
+  // The homepage "Новинки" carousel is a static page — without this a new
+  // product only showed up there after the next deploy.
+  revalidatePath("/");
   // Back to the list, not the new product's own edit page — closes out
   // the "add product" flow instead of dropping the admin into another
   // form to review/edit what they just filled in.
@@ -125,6 +129,7 @@ export async function updateProductAction(
   } catch (err) {
     return { error: friendlyProductError(err) };
   }
+  revalidatePath("/");
   redirect("/admin/products?updated=1");
 }
 
@@ -159,5 +164,6 @@ export async function deleteProductAction(id: string): Promise<void> {
   } catch {
     redirect("/admin/products?deleteError=1");
   }
+  revalidatePath("/");
   redirect("/admin/products?deleted=1");
 }

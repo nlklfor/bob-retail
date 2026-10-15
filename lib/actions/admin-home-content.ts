@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import { revalidatePath } from "next/cache";
 import { requireStaffSession } from "@/lib/admin/dal";
 import { updateHomeFeatureImage } from "@/lib/admin/home-content";
 
@@ -33,5 +34,7 @@ export async function updateHomeFeatureImageAction(
     productId: parsed.data.productId,
   });
 
+  // The feature images live on the static homepage — refresh it now.
+  revalidatePath("/");
   return { success: true };
 }

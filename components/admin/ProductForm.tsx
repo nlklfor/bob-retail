@@ -31,6 +31,7 @@ export function ProductForm({ categories, product, action }: Props) {
   const [images, setImages] = useState<string[]>(product?.images ?? []);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
 
   const [variants, setVariants] = useState<VariantRow[]>(
     product?.product_variants.map((v) => ({
@@ -71,6 +72,18 @@ export function ProductForm({ categories, product, action }: Props) {
     }
 
     setUploading(false);
+  }
+
+  // The first image is the main one — it's what the catalog, homepage and
+  // order emails show — so order matters.
+  function moveImage(from: number, to: number) {
+    setImages((prev) => {
+      if (from === to || to < 0 || to >= prev.length) return prev;
+      const next = [...prev];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      return next;
+    });
   }
 
   function removeImage(index: number) {
@@ -254,17 +267,62 @@ export function ProductForm({ categories, product, action }: Props) {
         >
           Зображення
         </label>
+        {images.length > 1 ? (
+          <p className="mt-1 text-xs text-muted">
+            Перетягніть фото або скористайтесь стрілками, щоб змінити порядок.
+            Перше фото — головне.
+          </p>
+        ) : null}
         <div className="mt-2 flex flex-wrap gap-3">
           {images.map((url, i) => (
-            <div key={url} className="relative h-24 w-20">
-              <Image src={url} alt="" fill className="object-cover" />
-              <button
-                type="button"
-                onClick={() => removeImage(i)}
-                className="absolute -right-2 -top-2 bg-bg border border-border px-1 text-xs hover:text-danger"
+            <div
+              key={url}
+              draggable
+              onDragStart={() => setDragIndex(i)}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={() => {
+                if (dragIndex !== null) moveImage(dragIndex, i);
+                setDragIndex(null);
+              }}
+              onDragEnd={() => setDragIndex(null)}
+              className={`w-20 cursor-grab ${dragIndex === i ? "opacity-40" : ""}`}
+            >
+              <div
+                className={`relative h-24 w-20 ${i === 0 ? "ring-2 ring-highlight" : ""}`}
               >
-                ×
-              </button>
+                <Image src={url} alt="" fill className="object-cover" />
+                <span className="absolute left-0 top-0 bg-bg/90 px-1 text-xs">
+                  {i === 0 ? "Головне" : i + 1}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => removeImage(i)}
+                  aria-label="Видалити фото"
+                  className="absolute -right-2 -top-2 bg-bg border border-border px-1 text-xs hover:text-danger"
+                >
+                  ×
+                </button>
+              </div>
+              <div className="mt-1 flex justify-between text-sm">
+                <button
+                  type="button"
+                  onClick={() => moveImage(i, i - 1)}
+                  disabled={i === 0}
+                  aria-label="Перемістити ліворуч"
+                  className="px-2 hover:text-highlight disabled:opacity-20"
+                >
+                  ←
+                </button>
+                <button
+                  type="button"
+                  onClick={() => moveImage(i, i + 1)}
+                  disabled={i === images.length - 1}
+                  aria-label="Перемістити праворуч"
+                  className="px-2 hover:text-highlight disabled:opacity-20"
+                >
+                  →
+                </button>
+              </div>
             </div>
           ))}
         </div>

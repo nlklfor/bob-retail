@@ -16,7 +16,10 @@ export default function ContactsPage() {
         </h1>
 
         <div className="mt-16 grid gap-12 sm:grid-cols-2">
-          <div className="relative aspect-square sm:aspect-auto">
+          {/* Fixed min-height on wide screens: this column used to take its
+              height purely from the form beside it, so swapping the form
+              for the short "thank you" message collapsed the image. */}
+          <div className="relative aspect-square sm:aspect-auto sm:min-h-[460px]">
             <Image
               src="/images/contact_3d.png"
               alt="3D Logo"

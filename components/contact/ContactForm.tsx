@@ -16,24 +16,37 @@ export function ContactForm() {
     setStatus("submitting");
     setError(null);
 
-    const result = await sendContactMessageAction(
-      new FormData(e.currentTarget),
-    );
+    // Captured up front — React nulls e.currentTarget once the handler
+    // awaits, so reading it after the action call would throw.
+    const form = e.currentTarget;
+    const result = await sendContactMessageAction(new FormData(form));
     if (!result.success) {
       setError(result.error);
       setStatus("idle");
       return;
     }
 
+    form.reset();
     setStatus("done");
-    e.currentTarget.reset();
   }
 
   if (status === "done") {
     return (
-      <p className="text-muted">
-        Дякуємо! Ми зв&apos;яжемося з вами найближчим часом.
-      </p>
+      <div className="flex h-full flex-col justify-center py-12">
+        <p className="font-display text-3xl uppercase tracking-tight">
+          Дякуємо!
+        </p>
+        <p className="mt-3 leading-relaxed text-muted">
+          Повідомлення надіслано. Ми зв&apos;яжемося з вами найближчим часом.
+        </p>
+        <button
+          type="button"
+          onClick={() => setStatus("idle")}
+          className="mt-6 self-start text-sm text-highlight hover:underline"
+        >
+          Надіслати ще одне повідомлення
+        </button>
+      </div>
     );
   }
 

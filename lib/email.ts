@@ -24,6 +24,9 @@ export async function sendEmail(input: {
   to: string;
   subject: string;
   text: string;
+  // Branded layout (lib/email-templates.ts). Sent alongside `text`, never
+  // instead of it — clients pick whichever they can show.
+  html?: string;
   // For marketing email — lets mail clients show a native "Unsubscribe".
   unsubscribeUrl?: string;
 }): Promise<void> {
@@ -41,6 +44,7 @@ export async function sendEmail(input: {
       replyTo: BUSINESS_EMAIL,
       subject: input.subject,
       text: input.text,
+      html: input.html,
       headers: input.unsubscribeUrl
         ? { "List-Unsubscribe": `<${input.unsubscribeUrl}>` }
         : undefined,

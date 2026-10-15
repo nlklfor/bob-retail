@@ -81,6 +81,9 @@ export type PromoCode = {
 export type OrderItem = {
   id: string;
   order_id: string;
+  // Null once the product itself has been deleted — the rest of the row is
+  // a snapshot that survives that.
+  product_id: string | null;
   product_name: string;
   size: string | null;
   unit_price: number;

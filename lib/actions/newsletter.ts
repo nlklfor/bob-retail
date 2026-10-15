@@ -4,7 +4,7 @@ import { z } from "zod";
 import { createAdminClient } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email";
 import { getWelcomePromoCode } from "@/lib/admin/promo-codes";
-import { describePromo } from "@/lib/promo-discount";
+import { renderWelcomeEmail } from "@/lib/email-templates";
 
 const emailSchema = z.string().trim().min(1).email("Введіть коректний email.");
 
@@ -49,40 +49,15 @@ async function sendWelcomeEmail(
   const siteUrl = process.env.SITE_URL ?? "";
   const unsubscribeUrl = `${siteUrl}/unsubscribe?token=${unsubscribeToken}`;
 
-  let promoLines: string[] = [];
+  let promo: Awaited<ReturnType<typeof getWelcomePromoCode>> = null;
   try {
-    const promo = await getWelcomePromoCode();
-    if (promo) {
-      promoLines = [
-        `Ваш промокод: ${promo.code} — ${describePromo(promo)}.`,
-        promo.min_order_amount
-          ? `Діє для замовлень від ${Math.round(promo.min_order_amount)} грн.`
-          : null,
-        "Введіть його в кошику під час оформлення замовлення.",
-        "",
-      ].filter((line): line is string => line !== null);
-    }
+    promo = await getWelcomePromoCode();
   } catch (err) {
     // The subscription is already saved — a failed promo lookup just means
     // the welcome email goes out without a code, not that it fails.
     console.error("Failed to load welcome promo code:", err);
   }
 
-  await sendEmail({
-    to: email,
-    subject: "Дякуємо за підписку на BOB Retail",
-    unsubscribeUrl,
-    text: [
-      "Дякуємо, що підписалися на розсилку BOB Retail.",
-      "",
-      ...promoLines,
-      "Тут ви першими дізнаватиметесь про новинки та знижки.",
-      "",
-      `Магазин: ${siteUrl}`,
-      "",
-      "Bob — only legit items.",
-      "",
-      `Відписатися від розсилки: ${unsubscribeUrl}`,
-    ].join("\n"),
-  });
+  const message = renderWelcomeEmail({ siteUrl, unsubscribeUrl, promo });
+  await sendEmail({ to: email, ...message, unsubscribeUrl });
 }

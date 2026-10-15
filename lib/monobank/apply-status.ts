@@ -2,6 +2,7 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/server";
 import { sendEmail, BUSINESS_EMAIL } from "@/lib/email";
 import { getOrderForAdmin } from "@/lib/admin/orders";
+import { renderOrderConfirmationEmail } from "@/lib/email-templates";
 import type { MonobankInvoiceStatus } from "./client";
 
 // Single source of truth for "a Monobank invoice reached status X — what
@@ -92,10 +93,44 @@ async function notifyOrderPaid(orderId: string): Promise<void> {
   });
 
   if (order.customer_email) {
-    await sendEmail({
-      to: order.customer_email,
-      subject: `BOB Retail — замовлення №${order.id.slice(0, 8)} оплачено`,
-      text: `Дякуємо за замовлення!\n\n${summary}`,
-    });
+    const imageByProductId = await getProductThumbnails(
+      order.order_items.map((item) => item.product_id),
+    );
+    const message = renderOrderConfirmationEmail(
+      {
+        ...order,
+        items: order.order_items.map((item) => ({
+          ...item,
+          imageUrl: item.product_id
+            ? (imageByProductId.get(item.product_id) ?? null)
+            : null,
+        })),
+      },
+      process.env.SITE_URL ?? "https://frombobwithlove.com",
+    );
+    await sendEmail({ to: order.customer_email, ...message });
   }
+}
+
+// First photo of each product, for the thumbnails in the confirmation
+// email. A failure here just means an email without photos.
+async function getProductThumbnails(
+  productIds: (string | null)[],
+): Promise<Map<string, string>> {
+  const ids = [...new Set(productIds.filter((id): id is string => !!id))];
+  const map = new Map<string, string>();
+  if (ids.length === 0) return map;
+
+  const { data, error } = await createAdminClient()
+    .from("products")
+    .select("id, images")
+    .in("id", ids);
+  if (error) {
+    console.error("Failed to load product images for order email:", error);
+    return map;
+  }
+  for (const product of data ?? []) {
+    if (product.images?.[0]) map.set(product.id, product.images[0]);
+  }
+  return map;
 }

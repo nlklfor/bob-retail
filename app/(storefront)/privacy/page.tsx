@@ -109,10 +109,10 @@ export default function PrivacyPage() {
             персональних даних, а також відкликати згоду на розсилку в будь-який
             момент — напишіть нам на{" "}
             <a
-              href="mailto:frombobwithlove@gmail.com"
+              href="mailto:frombobwithlove.com@gmail.com"
               className="text-highlight hover:underline"
             >
-              frombobwithlove@gmail.com
+              frombobwithlove.com@gmail.com
             </a>
             .
           </p>
@@ -150,10 +150,10 @@ export default function PrivacyPage() {
           <p className="mt-3 leading-relaxed text-muted">
             Питання щодо обробки персональних даних — на{" "}
             <a
-              href="mailto:frombobwithlove@gmail.com"
+              href="mailto:frombobwithlove.com@gmail.com"
               className="text-highlight hover:underline"
             >
-              frombobwithlove@gmail.com
+              frombobwithlove.com@gmail.com
             </a>{" "}
             або{" "}
             <a

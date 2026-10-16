@@ -67,10 +67,10 @@ export default function CookiesPage() {
           <p className="mt-3 leading-relaxed text-muted">
             Питання — на{" "}
             <a
-              href="mailto:frombobwithlove@gmail.com"
+              href="mailto:frombobwithlove.com@gmail.com"
               className="text-highlight hover:underline"
             >
-              frombobwithlove@gmail.com
+              frombobwithlove.com@gmail.com
             </a>
             .
           </p>

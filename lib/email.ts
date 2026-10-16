@@ -14,7 +14,7 @@ const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
 // The business's own inbox — receives contact-form and new-order
 // notifications, and is where customer replies to any email we send land
 // (the sending domain itself has no mailbox).
-export const BUSINESS_EMAIL = "frombobwithlove@gmail.com";
+export const BUSINESS_EMAIL = "frombobwithlove.com@gmail.com";
 
 // Never throws — email is a side effect, not something that should ever
 // block a contact-form submission or an order from succeeding. Silently

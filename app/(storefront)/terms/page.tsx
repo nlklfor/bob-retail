@@ -264,10 +264,10 @@ export default function TermsPage() {
             <br />
             Email:{" "}
             <a
-              href="mailto:frombobwithlove@gmail.com"
+              href="mailto:frombobwithlove.com@gmail.com"
               className="text-highlight hover:underline"
             >
-              frombobwithlove@gmail.com
+              frombobwithlove.com@gmail.com
             </a>
             <br />
             Телефон:{" "}

@@ -24,6 +24,10 @@ const C = {
 
 const FONT = "Helvetica, Arial, sans-serif";
 
+// The shop's name as it appears in subjects and email text (the inbox
+// sender name itself comes from RESEND_FROM_EMAIL).
+const BRAND = "Bobretailer";
+
 export type RenderedEmail = { subject: string; html: string; text: string };
 
 function esc(value: string): string {
@@ -59,10 +63,24 @@ function layout(opts: {
   body: string;
   siteUrl: string;
   unsubscribeUrl?: string;
+  // Shop-facing notification: swaps the customer footer (social links,
+  // "reply to this email") for a short note about where it came from.
+  internal?: boolean;
 }): string {
-  const { preheader, body, siteUrl, unsubscribeUrl } = opts;
+  const { preheader, body, siteUrl, unsubscribeUrl, internal } = opts;
   const link = (href: string, label: string) =>
     `<a href="${esc(href)}" style="color:${C.muted};text-decoration:underline;">${label}</a>`;
+
+  const footer = internal
+    ? `Автоматичне сповіщення з сайту ${link(siteUrl, "frombobwithlove.com")}.`
+    : [
+        "Bob — only legit items.",
+        `${link("https://www.instagram.com/bobretailer", "Instagram")} &nbsp;·&nbsp; ${link("https://t.me/frombobwithlove", "Telegram")} &nbsp;·&nbsp; ${link(siteUrl, "frombobwithlove.com")}`,
+        "Питання? Просто дайте відповідь на цей лист.",
+      ].join("<br>") +
+      (unsubscribeUrl
+        ? `<br><br>Ви отримали цей лист, бо підписалися на розсилку ${BRAND}. ${link(unsubscribeUrl, "Відписатися")}`
+        : "");
 
   return `<!doctype html>
 <html lang="uk">
@@ -71,7 +89,7 @@ function layout(opts: {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light">
 <meta name="supported-color-schemes" content="light">
-<title>BOB Retail</title>
+<title>${BRAND}</title>
 </head>
 <body style="margin:0;padding:0;background:${C.page};">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">${esc(preheader)}</div>
@@ -85,13 +103,7 @@ function layout(opts: {
 ${body}
     </td></tr>
     <tr><td style="padding:24px 32px 32px;border-top:1px solid ${C.border};font-family:${FONT};font-size:12px;line-height:1.7;color:${C.muted};">
-      Bob — only legit items.<br>
-      ${link("https://www.instagram.com/bobretailer", "Instagram")} &nbsp;·&nbsp; ${link("https://t.me/frombobwithlove", "Telegram")} &nbsp;·&nbsp; ${link(siteUrl, "frombobwithlove.com")}<br>
-      Питання? Просто дайте відповідь на цей лист.${
-        unsubscribeUrl
-          ? `<br><br>Ви отримали цей лист, бо підписалися на розсилку BOB Retail. ${link(unsubscribeUrl, "Відписатися")}`
-          : ""
-      }
+      ${footer}
     </td></tr>
   </table>
 </td></tr>
@@ -204,7 +216,7 @@ ${button(orderUrl, "Переглянути замовлення")}`;
   ].join("\n");
 
   return {
-    subject: `Замовлення №${number} оплачено — BOB Retail`,
+    subject: `Замовлення №${number} оплачено — ${BRAND}`,
     html: layout({
       preheader: `Оплату отримано, замовлення №${number} в роботі.`,
       body,
@@ -251,7 +263,7 @@ ${paragraph("Введіть його в кошику під час оформл�
 
   const body = `
 ${heading("Дякуємо за підписку!")}
-${paragraph("Тепер ви першими дізнаватиметесь про новинки, дропи та знижки BOB Retail.")}
+${paragraph(`Тепер ви першими дізнаватиметесь про новинки, дропи та знижки ${BRAND}.`)}
 ${promoBlock}
 ${button(siteUrl, "Перейти до магазину")}
 ${paragraph("Тільки оригінальні речі — з любов'ю від Боба.", true)}`;
@@ -259,7 +271,7 @@ ${paragraph("Тільки оригінальні речі — з любов'ю �
   const text = [
     `Дякуємо за підписку!`,
     ``,
-    `Тепер ви першими дізнаватиметесь про новинки, дропи та знижки BOB Retail.`,
+    `Тепер ви першими дізнаватиметесь про новинки, дропи та знижки ${BRAND}.`,
     ``,
     ...(promo
       ? [
@@ -278,15 +290,145 @@ ${paragraph("Тільки оригінальні речі — з любов'ю �
 
   return {
     subject: promo
-      ? `Ваш промокод: ${promoDescription} — BOB Retail`
-      : "Дякуємо за підписку на BOB Retail",
+      ? `Ваш промокод: ${promoDescription} — ${BRAND}`
+      : `Дякуємо за підписку на ${BRAND}`,
     html: layout({
       preheader: promo
         ? `Ваш промокод ${promo.code} — ${promoDescription}.`
-        : "Ви підписалися на розсилку BOB Retail.",
+        : `Ви підписалися на розсилку ${BRAND}.`,
       body,
       siteUrl,
       unsubscribeUrl,
+    }),
+    text,
+  };
+}
+
+// ---------------------------------------------------------------------
+// Shop notifications — sent to the business inbox (new paid order,
+// contact form, «Під замовлення» request, price offer). One shared shape:
+// a details table, optional item list / photos / message, and a button
+// straight to the right place (admin page, or a reply for contact mail).
+// Everything customer-typed goes through esc() — this is the one email
+// type whose content is written by strangers.
+// ---------------------------------------------------------------------
+
+export type NotificationInput = {
+  subject: string;
+  heading: string;
+  preheader: string;
+  rows: { label: string; value: string; href?: string }[];
+  items?: {
+    name: string;
+    detail: string;
+    price: string;
+    imageUrl: string | null;
+  }[];
+  totals?: { label: string; value: string; strong?: boolean }[];
+  photos?: string[];
+  message?: { label: string; text: string };
+  button: { href: string; label: string };
+  siteUrl: string;
+};
+
+// Customer-supplied links only become clickable for safe schemes.
+function safeHref(href: string | undefined): string | null {
+  if (!href) return null;
+  return /^(https?:|mailto:|tel:)/i.test(href) ? href : null;
+}
+
+export function renderNotificationEmail(n: NotificationInput): RenderedEmail {
+  const rows = n.rows
+    .filter((r) => r.value.trim() !== "")
+    .map((r) => {
+      const href = safeHref(r.href);
+      const value = href
+        ? `<a href="${esc(href)}" style="color:${C.fg};text-decoration:underline;">${esc(r.value)}</a>`
+        : esc(r.value);
+      return `<tr>
+  <td width="38%" style="padding:8px 12px 8px 0;border-bottom:1px solid ${C.border};vertical-align:top;font-family:${FONT};font-size:12px;letter-spacing:0.06em;text-transform:uppercase;color:${C.muted};">${esc(r.label)}</td>
+  <td style="padding:8px 0;border-bottom:1px solid ${C.border};vertical-align:top;font-family:${FONT};font-size:14px;line-height:1.5;color:${C.fg};word-break:break-word;">${value}</td>
+</tr>`;
+    })
+    .join("");
+
+  const items = n.items?.length
+    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:24px 0 8px;">${n.items
+        .map(
+          (i) => `<tr>
+  <td width="60" style="padding:10px 0;border-bottom:1px solid ${C.border};vertical-align:top;">${
+    i.imageUrl
+      ? `<img src="${esc(i.imageUrl)}" width="48" height="64" alt="" style="display:block;width:48px;height:64px;object-fit:cover;background:${C.surface};border:0;">`
+      : `<div style="width:48px;height:64px;background:${C.surface};"></div>`
+  }</td>
+  <td style="padding:10px 12px 10px 0;border-bottom:1px solid ${C.border};vertical-align:top;font-family:${FONT};font-size:14px;line-height:1.5;color:${C.fg};">${esc(i.name)}<br><span style="font-size:13px;color:${C.muted};">${esc(i.detail)}</span></td>
+  <td align="right" style="padding:10px 0;border-bottom:1px solid ${C.border};vertical-align:top;font-family:${FONT};font-size:14px;color:${C.fg};white-space:nowrap;">${esc(i.price)}</td>
+</tr>`,
+        )
+        .join("")}</table>`
+    : "";
+
+  const totals = n.totals?.length
+    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 8px;">${n.totals
+        .map(
+          (t) =>
+            `<tr><td style="padding:3px 0;font-family:${FONT};font-size:${t.strong ? "16px" : "14px"};${t.strong ? "font-weight:700;" : ""}color:${t.strong ? C.fg : C.muted};">${esc(t.label)}</td><td align="right" style="padding:3px 0;font-family:${FONT};font-size:${t.strong ? "16px" : "14px"};${t.strong ? "font-weight:700;" : ""}color:${C.fg};white-space:nowrap;">${esc(t.value)}</td></tr>`,
+        )
+        .join("")}</table>`
+    : "";
+
+  const photos = n.photos?.length
+    ? `<div style="margin:24px 0 0;">${n.photos
+        .map(
+          (url) =>
+            `<a href="${esc(url)}" style="display:inline-block;margin:0 8px 8px 0;"><img src="${esc(url)}" width="96" height="128" alt="" style="display:block;width:96px;height:128px;object-fit:cover;background:${C.surface};border:0;"></a>`,
+        )
+        .join("")}</div>`
+    : "";
+
+  const message = n.message
+    ? `<div style="margin:24px 0 0;padding:16px 20px;background:${C.surface};font-family:${FONT};font-size:14px;line-height:1.6;color:${C.fg};">
+  <div style="margin-bottom:6px;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:${C.muted};">${esc(n.message.label)}</div>
+  ${esc(n.message.text).replace(/\r?\n/g, "<br>")}
+</div>`
+    : "";
+
+  const body = `
+<div style="margin:0 0 8px;font-family:${FONT};font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:${C.highlight};">Сповіщення магазину</div>
+${heading(n.heading)}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">${rows}</table>
+${items}
+${totals}
+${photos}
+${message}
+<div style="height:24px;line-height:24px;">&nbsp;</div>
+${button(n.button.href, n.button.label)}`;
+
+  const text = [
+    n.heading,
+    "",
+    ...n.rows
+      .filter((r) => r.value.trim() !== "")
+      .map((r) => `${r.label}: ${r.value}`),
+    ...(n.items?.length
+      ? ["", ...n.items.map((i) => `${i.name} (${i.detail}) — ${i.price}`)]
+      : []),
+    ...(n.totals?.length
+      ? ["", ...n.totals.map((t) => `${t.label}: ${t.value}`)]
+      : []),
+    ...(n.photos?.length ? ["", `Фото: ${n.photos.join(", ")}`] : []),
+    ...(n.message ? ["", `${n.message.label}:`, n.message.text] : []),
+    "",
+    `${n.button.label}: ${n.button.href}`,
+  ].join("\n");
+
+  return {
+    subject: n.subject,
+    html: layout({
+      preheader: n.preheader,
+      body,
+      siteUrl: n.siteUrl,
+      internal: true,
     }),
     text,
   };

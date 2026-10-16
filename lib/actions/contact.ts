@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { createAdminClient } from "@/lib/supabase/server";
 import { sendEmail, BUSINESS_EMAIL } from "@/lib/email";
+import { renderNotificationEmail } from "@/lib/email-templates";
 
 const contactSchema = z.object({
   name: z.string().trim().min(1, "Вкажіть ім'я."),
@@ -47,21 +48,26 @@ export async function sendContactMessageAction(
     };
   }
 
-  await sendEmail({
-    to: BUSINESS_EMAIL,
-    subject: `Нове повідомлення від ${parsed.data.name}`,
-    text: [
-      `Ім'я: ${parsed.data.name}`,
-      `Email: ${parsed.data.email}`,
-      parsed.data.socialHandle
-        ? `Telegram/Instagram: ${parsed.data.socialHandle}`
-        : null,
-      "",
-      parsed.data.message,
-    ]
-      .filter((line) => line !== null)
-      .join("\n"),
+  const { name, email, socialHandle, message } = parsed.data;
+  const notification = renderNotificationEmail({
+    subject: `Нове повідомлення від ${name}`,
+    heading: "Нове повідомлення",
+    preheader: message.slice(0, 120),
+    rows: [
+      { label: "Ім'я", value: name },
+      { label: "Email", value: email, href: `mailto:${email}` },
+      { label: "Telegram/Instagram", value: socialHandle ?? "" },
+    ],
+    message: { label: "Повідомлення", text: message },
+    // There's no admin inbox for contact messages yet, so the useful action
+    // is answering — and Reply in Gmail goes to the customer too (replyTo).
+    button: {
+      href: `mailto:${email}?subject=${encodeURIComponent("Re: ваше повідомлення на frombobwithlove.com")}`,
+      label: "Відповісти",
+    },
+    siteUrl: process.env.SITE_URL ?? "https://frombobwithlove.com",
   });
+  await sendEmail({ to: BUSINESS_EMAIL, replyTo: email, ...notification });
 
   return { success: true };
 }

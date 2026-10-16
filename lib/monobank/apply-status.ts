@@ -2,7 +2,11 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/server";
 import { sendEmail, BUSINESS_EMAIL } from "@/lib/email";
 import { getOrderForAdmin } from "@/lib/admin/orders";
-import { renderOrderConfirmationEmail } from "@/lib/email-templates";
+import {
+  renderNotificationEmail,
+  renderOrderConfirmationEmail,
+} from "@/lib/email-templates";
+import { formatPrice } from "@/lib/format";
 import type { MonobankInvoiceStatus } from "./client";
 
 // Single source of truth for "a Monobank invoice reached status X — what
@@ -61,52 +65,83 @@ async function notifyOrderPaid(orderId: string): Promise<void> {
   const order = await getOrderForAdmin(orderId);
   if (!order) return;
 
-  const itemLines = order.order_items
-    .map(
-      (item) =>
-        `${item.product_name}${item.size ? ` (${item.size})` : ""} x${item.quantity} — ${item.line_total} грн`,
-    )
-    .join("\n");
+  const siteUrl = process.env.SITE_URL ?? "https://frombobwithlove.com";
+  const number = order.id.slice(0, 8).toUpperCase();
+  const imageByProductId = await getProductThumbnails(
+    order.order_items.map((item) => item.product_id),
+  );
+  const imageFor = (productId: string | null) =>
+    productId ? (imageByProductId.get(productId) ?? null) : null;
 
-  const summary = [
-    `Замовлення №${order.id.slice(0, 8)}`,
-    "",
-    itemLines,
-    "",
-    `Сума: ${order.subtotal} грн`,
-    `Доставка: ${order.shipping_cost} грн`,
-    order.discount > 0
-      ? `Промокод${order.promo_code ? ` ${order.promo_code}` : ""}: −${order.discount} грн`
-      : null,
-    `Разом: ${order.total} грн`,
-    "",
-    `Отримувач: ${order.customer_name}, ${order.customer_phone}`,
-    `Нова Пошта: ${order.shipping_city}, ${order.shipping_branch}`,
-  ]
-    .filter((line) => line !== null)
-    .join("\n");
-
+  const notification = renderNotificationEmail({
+    subject: `Оплачено замовлення №${number} — ${formatPrice(order.total)} грн`,
+    heading: `Нове замовлення №${number}`,
+    preheader: `${order.customer_name} · ${formatPrice(order.total)} грн · ${order.shipping_city}`,
+    rows: [
+      { label: "Статус", value: "Оплачено" },
+      { label: "Отримувач", value: order.customer_name },
+      {
+        label: "Телефон",
+        value: order.customer_phone,
+        href: `tel:${order.customer_phone}`,
+      },
+      {
+        label: "Email",
+        value: order.customer_email ?? "",
+        href: order.customer_email
+          ? `mailto:${order.customer_email}`
+          : undefined,
+      },
+      {
+        label: "Нова Пошта",
+        value: `${order.shipping_city}, ${order.shipping_branch}`,
+      },
+    ],
+    items: order.order_items.map((item) => ({
+      name: item.product_name,
+      detail: `${item.size ? `Розмір: ${item.size} · ` : ""}Кількість: ${item.quantity}`,
+      price: `${formatPrice(item.line_total)} грн`,
+      imageUrl: imageFor(item.product_id),
+    })),
+    totals: [
+      { label: "Сума", value: `${formatPrice(order.subtotal)} грн` },
+      { label: "Доставка", value: `${formatPrice(order.shipping_cost)} грн` },
+      ...(order.discount > 0
+        ? [
+            {
+              label: `Промокод${order.promo_code ? ` ${order.promo_code}` : ""}`,
+              value: `−${formatPrice(order.discount)} грн`,
+            },
+          ]
+        : []),
+      {
+        label: "Разом",
+        value: `${formatPrice(order.total)} грн`,
+        strong: true,
+      },
+    ],
+    button: {
+      href: `${siteUrl}/admin/orders/${order.id}`,
+      label: "Відкрити в адмінці",
+    },
+    siteUrl,
+  });
   await sendEmail({
     to: BUSINESS_EMAIL,
-    subject: `Оплачено замовлення №${order.id.slice(0, 8)}`,
-    text: summary,
+    replyTo: order.customer_email || undefined,
+    ...notification,
   });
 
   if (order.customer_email) {
-    const imageByProductId = await getProductThumbnails(
-      order.order_items.map((item) => item.product_id),
-    );
     const message = renderOrderConfirmationEmail(
       {
         ...order,
         items: order.order_items.map((item) => ({
           ...item,
-          imageUrl: item.product_id
-            ? (imageByProductId.get(item.product_id) ?? null)
-            : null,
+          imageUrl: imageFor(item.product_id),
         })),
       },
-      process.env.SITE_URL ?? "https://frombobwithlove.com",
+      siteUrl,
     );
     await sendEmail({ to: order.customer_email, ...message });
   }

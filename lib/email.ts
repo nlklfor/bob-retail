@@ -6,7 +6,7 @@ const resend = process.env.RESEND_API_KEY
   : null;
 
 // Set RESEND_FROM_EMAIL to an address on the verified domain, e.g.
-// "BOB Retail <hello@frombobwithlove.com>". Without it, this falls back to
+// "Bobretailer <hello@frombobwithlove.com>". Without it, this falls back to
 // Resend's shared sandbox sender, which only delivers to the Resend
 // account owner's own address — fine for testing, not for customers.
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
@@ -27,6 +27,9 @@ export async function sendEmail(input: {
   // Branded layout (lib/email-templates.ts). Sent alongside `text`, never
   // instead of it — clients pick whichever they can show.
   html?: string;
+  // Who "Reply" goes to. Defaults to the shop inbox; shop notifications set
+  // it to the customer, so the owner can answer straight from Gmail.
+  replyTo?: string;
   // For marketing email — lets mail clients show a native "Unsubscribe".
   unsubscribeUrl?: string;
 }): Promise<void> {
@@ -41,7 +44,7 @@ export async function sendEmail(input: {
     const { error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: input.to,
-      replyTo: BUSINESS_EMAIL,
+      replyTo: input.replyTo || BUSINESS_EMAIL,
       subject: input.subject,
       text: input.text,
       html: input.html,
